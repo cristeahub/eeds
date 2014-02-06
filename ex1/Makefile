@@ -20,6 +20,10 @@ ex1.elf : ex1.o
 ex1.o : ex1.s
 	${AS} ${ASFLAGS} $< -o $@
 
+.PHONY : debug
+debug:
+	arm-none-eabi-gdb -tui ex1.elf
+
 .PHONY : upload
 upload :
 	-eACommander.sh -r --address 0x00000000 -f "ex1.bin" -r
