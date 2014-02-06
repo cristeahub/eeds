@@ -4,6 +4,11 @@ assets/
 ## VIM
 *.sw*
 
+## Produced files
+*.bin
+*.elf
+*.o
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
