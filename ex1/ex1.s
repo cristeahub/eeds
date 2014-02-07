@@ -106,6 +106,7 @@ low_cooling:
     bl ye_olde_big_effect
 
 ye_olde_big_effect:
+    // ((r1 & 0xf000) << 1 | (r1 & 0x0f00) >> 1) & 0xff00
     and r4, r1, #0xf000
     and r5, r1, #0x0f00
     lsl r4, r4, #1
