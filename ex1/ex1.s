@@ -18,13 +18,13 @@
 _reset:
 
     // aliases for constants, don't change these
-    gpio .req r9
-    gpio_o .req r8
-    gpio_i .req r7
-    cw .req r6
-    ldr r9, =GPIO_BASE
-    ldr r8, =GPIO_PA_BASE
-    ldr r7, =GPIO_PC_BASE
+    gpio .req r11
+    gpio_o .req r10
+    gpio_i .req r9
+    cw .req r8
+    ldr r11, =GPIO_BASE
+    ldr r10, =GPIO_PA_BASE
+    ldr r9, =GPIO_PC_BASE
 
     // LOAD CMU BASE ADDRESS
     ldr r1, =CMU_BASE
@@ -46,7 +46,44 @@ _reset:
     // boot sequence
     bl boot_sequence
 
-// Setup for input
+    // set up pins for input (gamepad)
+    mov r2, #0x33333333
+    str r2, [gpio_i, #GPIO_MODEL]
+    mov r2, #0xff
+    str r2, [gpio_i, #GPIO_DOUT]
+
+    bl main_loop
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Main loop
+// The main loop that uses polling to check what buttons are being pressed
+//
+/////////////////////////////////////////////////////////////////////////////
+
+/* code for polling
+.thumb_func
+main_loop:
+    ldr r2, [gpio_i, #GPIO_DIN]
+    lsl r2, r2, #8
+    str r2, [gpio_o, #GPIO_DOUT]
+    b main_loop
+*/
+
+// code for interupts
+.thumb_func
+main_loop:
+    // set up interupts
+    mov r2, #0x22222222
+    str r2, [gpio, #GPIO_EXTIPSELL]
+    mov r2, #0xff
+    str r2, [gpio, #GPIO_EXTIFALL]
+    str r2, [gpio, #GPIO_EXTIRISE]
+    str r2, [gpio, #GPIO_IEN]
+    ldr r2, =0x802
+    ldr r3, =ISER0
+    str r2, [r3, #0]
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -57,7 +94,9 @@ _reset:
 
 .thumb_func
 gpio_handler:
-    b .  // do nothing
+    mov r2, #0xff
+    str r2, [gpio, #GPIO_IFC]
+
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -128,6 +167,18 @@ boot_sequence:
     mov r2, #1      // positions rotated
     mov r3, #8      // jumps made by the led
     bl start_seq
+
+    // reset lights, we are now ready for usage
+    // at least the user thinks so
+    // which doesn't make sense, since the users of this
+    // board know exactly what's going on and are like
+    // "why in gods name did they waste all that time??"
+    // well to you we say: energy consumption over time!
+    // as long as the board is on for long enough,
+    // we are safe!
+
+    mov r1, #0xff00
+    str r1, [gpio_o, #GPIO_DOUT]
 
     pop {pc}
 
