@@ -65,6 +65,11 @@ _reset:
 
 .thumb_func
 main:
+    // set up automatic deep sleep
+    ldr r2, =0x6
+    ldr r3, =SCR
+    str r2, [r3, #0]
+
     // set up interrupts
     mov r2, #0x22222222
     str r2, [gpio, #GPIO_EXTIPSELL]
