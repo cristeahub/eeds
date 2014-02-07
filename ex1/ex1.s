@@ -46,7 +46,44 @@ _reset:
     // boot sequence
     bl boot_sequence
 
-// Setup for input
+    // set up pins for input (gamepad)
+    mov r2, #0x33333333
+    str r2, [gpio_i, #GPIO_MODEL]
+    mov r2, #0xff
+    str r2, [gpio_i, #GPIO_DOUT]
+
+    bl main_loop
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Main loop
+// The main loop that uses polling to check what buttons are being pressed
+//
+/////////////////////////////////////////////////////////////////////////////
+
+/* code for polling
+.thumb_func
+main_loop:
+    ldr r2, [gpio_i, #GPIO_DIN]
+    lsl r2, r2, #8
+    str r2, [gpio_o, #GPIO_DOUT]
+    b main_loop
+*/
+
+// code for interupts
+.thumb_func
+main_loop:
+    // set up interupts
+    mov r2, #0x22222222
+    str r2, [gpio, #GPIO_EXTIPSELL]
+    mov r2, #0xff
+    str r2, [gpio, #GPIO_EXTIFALL]
+    str r2, [gpio, #GPIO_EXTIRISE]
+    str r2, [gpio, #GPIO_IEN]
+    ldr r2, =0x802
+    ldr r3, =ISER0
+    str r2, [r3, #0]
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -57,7 +94,9 @@ _reset:
 
 .thumb_func
 gpio_handler:
-    b .  // do nothing
+    mov r2, #0xff
+    str r2, [gpio, #GPIO_IFC]
+
 
 
 /////////////////////////////////////////////////////////////////////////////
