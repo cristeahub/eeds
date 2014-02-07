@@ -18,13 +18,13 @@
 _reset:
 
     // aliases for constants, don't change these
-    gpio .req r9
-    gpio_o .req r8
-    gpio_i .req r7
-    cw .req r6
-    ldr r9, =GPIO_BASE
-    ldr r8, =GPIO_PA_BASE
-    ldr r7, =GPIO_PC_BASE
+    gpio .req r11
+    gpio_o .req r10
+    gpio_i .req r9
+    cw .req r8
+    ldr r11, =GPIO_BASE
+    ldr r10, =GPIO_PA_BASE
+    ldr r9, =GPIO_PC_BASE
 
     // LOAD CMU BASE ADDRESS
     ldr r1, =CMU_BASE
@@ -128,6 +128,18 @@ boot_sequence:
     mov r2, #1      // positions rotated
     mov r3, #8      // jumps made by the led
     bl start_seq
+
+    // reset lights, we are now ready for usage
+    // at least the user thinks so
+    // which doesn't make sense, since the users of this
+    // board know exactly what's going on and are like
+    // "why in gods name did they waste all that time??"
+    // well to you we say: energy consumption over time!
+    // as long as the board is on for long enough,
+    // we are safe!
+
+    mov r1, #0xff00
+    str r1, [gpio_o, #GPIO_DOUT]
 
     pop {pc}
 
