@@ -52,29 +52,20 @@ _reset:
     mov r2, #0xff
     str r2, [gpio_i, #GPIO_DOUT]
 
-    bl main_loop
+    bl main
 
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Main loop
-// The main loop that uses polling to check what buttons are being pressed
+// Main
+// The main function that uses interrupts
+// to check what buttons are being pressed
 //
 /////////////////////////////////////////////////////////////////////////////
 
-/* code for polling
 .thumb_func
-main_loop:
-    ldr r2, [gpio_i, #GPIO_DIN]
-    lsl r2, r2, #8
-    str r2, [gpio_o, #GPIO_DOUT]
-    b main_loop
-*/
-
-// code for interupts
-.thumb_func
-main_loop:
-    // set up interupts
+main:
+    // set up interrupts
     mov r2, #0x22222222
     str r2, [gpio, #GPIO_EXTIPSELL]
     mov r2, #0xff
@@ -84,6 +75,11 @@ main_loop:
     ldr r2, =0x802
     ldr r3, =ISER0
     str r2, [r3, #0]
+
+    // input loop
+    LOOP:
+        wfi
+        b LOOP
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -97,7 +93,11 @@ gpio_handler:
     mov r2, #0xff
     str r2, [gpio, #GPIO_IFC]
 
+    ldr r2, [gpio_i, #GPIO_DIN]
+    lsl r2, r2, #8
+    str r2, [gpio_o, #GPIO_DOUT]
 
+    bx lr
 
 /////////////////////////////////////////////////////////////////////////////
 //
