@@ -1,7 +1,7 @@
 \section{Description and Methodology}
 \label{chap:description}
 
-\subsection{Development process}
+\subsection{Development process and implementation}
 \label{subsec:development_process}
 
 This chapter details the steps used during the development of the program. All of the development on the EFM32 was done in the computer lab 458 on the fourth floor of the Computer Science building (IT-bygget vest). Git was chosen as the version control system, mainly used together with GitHub. This meant we were not bound to work on the report inside of the lab.
@@ -16,6 +16,41 @@ The next step was to make interrupts work. A main function was constructed to se
 
 \subsubsection{Setting up the LEDs}
 \label{subsubsec:dev_pros_setup_led}
+
+The LEDs is connected to the EFM32 through the GPIO. To enable the GPIO the clock needs to be enabled for the GPIO controller. The CMU is responsible for the clock and is fortunantly very easy to use. Register $CMU\_HFPERCLKEN0$ is a 32 bits register with each bit correponding to a specific IO controller. The GPIO controller is on the 13th bit, after that bit has been set to 1 the GPIO is ready for use.
+
+\begin{lstlisting}
+// C-eqvivalent:
+// *CMU_HFPERCLKEN0 |= (1 << 13)
+ldr r1, =CMU_BASE
+ldr r2, [r1, #CMU_HFPERCLKEN0]
+mov r3, #1
+lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
+orr r2, r2, r3
+str r2, [r1, #CMU_HFPERCLKEN0]
+\end{lstlisting}
+
+The GPIO has multiple connections and the game pad is connected so that button presses is registered on the C connection and what lights to light is read from the A connection. Following this the drive strength of the light is set on the A connection. This can take one of four values, each of which corresponds to a different Ampère setting. Table \ref{tab:drive_strength} on page \pageref{tab:drive_strength} shows the different settings for drive strength.
+
+\begin{table}
+    \begin{center}
+    \begin{tabular}{| l | l | l |}
+        \hline
+        Value   & Mode      & Description \\
+        \hline
+        0       & STANDARD  & 6 mA drive current \\
+        \hline
+        1       & LOWEST    & 0.5 mA drive current \\
+        \hline
+        2       & HIGH      & 20 mA drive current \\
+        \hline
+        3       & LOW       & 2 mA drive current \\
+        \hline
+    \end{tabular}
+    \caption{Drive strength on the EFM32 GPIO}
+    \label{tab:drive_strength}
+    \end{center}
+\end{table}
 
 \subsubsection{Programming with interrupts}
 \label{subsubsec:dev_pros_interrupts}
