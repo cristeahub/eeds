@@ -14,7 +14,7 @@ The next step was to make interrupts work. A main function was constructed to se
 \subsection{Pre-assignment setup}
 \label{subsec:pre-assingment_setup}
 
-The assignment involves a lot of GPIO usage therefor some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for a simulation of a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from $r0$ to $r7$ is used for variable content. See table \ref{tab:register_design} on page \pageref{tab:register_design} for an overview of the registers.
+The assignment involves a lot of GPIO usage therefor some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for a simulation of a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} on page \pageref{tab:register_design} for an overview of the registers.
 
 \begin{table}
     \begin{center}
@@ -45,6 +45,7 @@ The assignment involves a lot of GPIO usage therefor some values are used over a
 
 The LEDs are connected to the EFM32 through the GPIO. To enable the GPIO, the clock needs to be enabled for the GPIO controller. The CMU is responsible for the clock and is fortunantly very easy to use. Register $CMU\_HFPERCLKEN0$ is a 32 bits register with each bit correponding to a specific IO controller. The GPIO controller is on the 13th bit, after that bit has been set to 1 the GPIO is ready for use.
 
+\begin{figure}[h!]
 \begin{code}
 // C-eqvivalent:
 // *CMU_HFPERCLKEN0 |= (1 << 13)
@@ -55,13 +56,20 @@ lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
 orr r2, r2, r3
 str r2, [r1, #CMU_HFPERCLKEN0]
 \end{code}
+\caption{Enable CMU for GPIO}
+\label{code:enable_cmu_gpio}
+\end{figure}
 
 The GPIO has multiple connections and the game pad is connected so that button presses are registered on the C connection and which lights should be on is read from the A connection. Following this, the drive strength of the light is set on the A connection. This can take one of four values, each of which corresponds to a different Ampère setting. Table \ref{tab:drive_strength} on page \pageref{tab:drive_strength} shows the different settings for drive strength. To save power the strength should be set as low as possible, but for this assignment the power consumption of the LEDs are ignored and therefor the drive strength is set to high.
 
+\begin{figure}[h!]
 \begin{code}
 mov r2, #0x2
 str r2, [gpio_o, #GPIO_CTRL]
 \end{code}
+\caption{Set drive strength for GPIO OUTPUT}
+\label{code:set_drive_gpio_o}
+\end{figure}
 
 \begin{table}
     \begin{center}
