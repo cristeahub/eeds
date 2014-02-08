@@ -10,12 +10,17 @@ The development environment for the EFM32 was already set up on the workstations
 
 The assignment was part of a bigger compendium which contained a lot of useful information. This gave us a quick insight to the different tools that were avaibale to us, as well as an explanation of the problem we needed to solve.
 
-Features of the program were added iteratively, beginning with simply getting the LEDs to light up and evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this, an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsec:dev_pros_opening_seq}. Afterwards, a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lightened up.
+Features of the program were added iteratively, beginning with simply getting the LEDs to light up and evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this, an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsubsec:dev_pros_opening_seq}. Afterwards, a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lightened up.
 
-The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A gpio handler was implemented to make sure we abort the interrupt as soon as possible, more on this later in \ref{subsec:dev_pros_interrupts}.
+The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A gpio handler was implemented to make sure we abort the interrupt as soon as possible, more on this later in section \ref{subsubsec:dev_pros_interrupts}.
 
 \subsubsection{Setting up the LEDs}
-\label{subsec:dev_pros_setup_led}
+\label{subsubsec:dev_pros_setup_led}
 
 \subsubsection{Programming with interrupts}
-\label{dev_pros_interrupts}
+\label{subsubsec:dev_pros_interrupts}
+The interrupt handler is implemented by first setting up the interrupt handlers.
+
+ISER0
+
+We then activate the External Interrupt Rising Edge Trigger Register, the External Interrupt Falling Edge Trigger Register, and the 
