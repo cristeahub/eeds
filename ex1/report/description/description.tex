@@ -19,8 +19,18 @@ The next step was to make interrupts work. A main function was constructed to se
 
 \subsubsection{Programming with interrupts}
 \label{subsubsec:dev_pros_interrupts}
-The interrupt handler is implemented by first setting up the interrupt handlers.
 
-ISER0
+Interrupt support is implemented by first setting up the interrupt handlers.
 
-We then activate the External Interrupt Rising Edge Trigger Register, the External Interrupt Falling Edge Trigger Register, and the 
+Then, we activate the pins corresponding to the buttons by writing 0x22222222 to GPIO\_EXTIPSELL.
+
+We further activate the External Interrupt Rising Edge Trigger, and the External Interrupt Falling Edge Trigger by writing 0xff to the GPIO\_EXTIRISE and GPIO\_EXTIFALL registers respectively.
+
+Interrupt generation is enabled by writing 0xff to GPIO\_IEN.
+
+To finally implement handling of interrupts, we set the two bits in ISER0 corresponding to our handler to 1. They are bit 1 and 11 in the register, resulting in the hexadecimal representation 0x802.
+
+The first thing that the GPIO handler takes cares of is to clear the interrupt. If this is not done, the handler will be called again as if the buttons are still being pressed.
+
+\subsubsection{Deep sleep}
+\label{dev_pros_deep_sleep}
