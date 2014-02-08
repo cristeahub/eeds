@@ -99,6 +99,24 @@ Then, we activate the pins corresponding to the buttons by writing 0x22222222 to
 We further activate the External Interrupt Rising Edge Trigger, and the External Interrupt Falling Edge Trigger by writing 0xff to the GPIO\_EXTIRISE and GPIO\_EXTIFALL registers respectively.
 Interrupt generation is enabled by writing 0xff to GPIO\_IEN.
 To finally implement handling of interrupts, we set the two bits in ISER0 corresponding to our handler to 1. They are bit 1 and 11 in the register, resulting in the hexadecimal representation 0x802.
+The code required for setting up interrupts can be seen in figure \ref{code:interrupt_setup}.
+
+\begin{figure}[h!]
+\begin{code}
+mov r2, #0x22222222
+str r2, [gpio, #GPIO_EXTIPSELL]
+mov r2, #0xff
+str r2, [gpio, #GPIO_EXTIFALL]
+str r2, [gpio, #GPIO_EXTIRISE]
+str r2, [gpio, #GPIO_IEN]
+ldr r2, =0x802
+ldr r3, =ISER0
+str r2, [r3, #0]
+\end{code}
+\caption{Code for enabling interrupts generation and handling}
+\label{code:interrupt_setup}
+\end{figure}
+
 
 The first thing that the GPIO handler takes cares of is to clear the interrupt. If this is not done, the handler will be called again as if the buttons are still being pressed.
 
