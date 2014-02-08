@@ -102,28 +102,28 @@ Deep sleep is a mode with a power consumption of only $1.1 \mu A$.
 This is achieved by disabling the high-frequency oscillator, and instead using a lower-frequency one.
 Many of the more power-consuming peripherals are also disabled in this mode.
 
-To activate deep sleep mode we must set bit number 2 of the System Control Register to 1, as seen in figure \ref{figure:deep_sleep}
+To activate deep sleep mode we must set bit number 2 of the System Control Register to 1, as seen in figure \ref{code:deep_sleep}
 
 \begin{figure}[h!]
-\begin{lstlisting}
+\begin{code}
 ldr r2, =0x4
 ldr r3, =SCR
 str r2, [r3, #0]
-\end{lstlisting}
+\end{code}
 \caption{Enabling deep sleep}
-\label{figure:deep_sleep}
+\label{code:deep_sleep}
 \end{figure}
 
 Since we are working with interrupts, we also want the CPU to go back to sleep when an interrupt has been handled.
 The System Control Register has a flag for this functionality as well, in bit number 1.
-We therefore write 0x6 to the SCR to enable both deep sleep and sleep on exit (see figure \ref{figure:deep_sleep_on_exit}).
+We therefore write 0x6 to the SCR to enable both deep sleep and sleep on exit (see figure \ref{code:deep_sleep_on_exit}).
 
 \begin{figure}[h!]
-\begin{lstlisting}
+\begin{code}
 ldr r2, =0x6
 ldr r3, =SCR
 str r2, [r3, #0]
-\end{lstlisting}
+\end{code}
 \caption{Enabling both deep sleep and sleep on exit}
-\label{figure:deep_sleep_on_exit}
+\label{code:deep_sleep_on_exit}
 \end{figure}
