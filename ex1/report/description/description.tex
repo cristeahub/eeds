@@ -71,6 +71,37 @@ str r2, [gpio_o, #GPIO_CTRL]
 \label{code:set_drive_gpio_o}
 \end{figure}
 
+The pins on the game pad is connected to the top 8 pins on the EFM32GG-DK3750 development kit. The constant 0x55555555 is written to the $GPIO\_PA\_MODEH$ register, this so the pins is set to output.
+
+\begin{figure}[h!]
+\begin{code}
+mov r2, #0x55555555
+str r2, [gpio_o, #GPIO_MODEH]
+\end{code}
+\caption{Set pins to output}
+\label{code:set_drive_gpio_o}
+\end{figure}
+
+\subsection{Setting up buttons on the gamepad}
+\label{subsec:dev_pros_button_setup}
+The program itself has a boot sequence after the LEDs are set up, the details of this can be read in section \ref{subsec:dev_pros_opening_seq}.
+
+The next operation sets the gamepad buttons up for input. All of the setup has been done by the setup of the LEDs, so there is no need for that. To enable the poins for input writing 0x33333333 to $GPIO\_PC\_MODEL$ is needed. To enable internal pull-up 0xff is written to $GPIO\_PC\_DOUT$. After this the buttons pressed in can be read from bits 0-7 of $GPIO\_PC\_DIN$ and the LEDs will light up by writing to bits 8-15 of $GPIO\_PA\_DOUT$.
+
+\begin{figure}[h!]
+\begin{code}
+mov r2, #0x33333333
+str r2, [gpio_i, #GPIO_MODEL]
+mov r2, #0xff
+str r2, [gpio_i, #GPIO_DOUT]
+\end{code}
+\caption{Enable buttons for gamepad}
+\label{code:set_drive_gpio_o}
+\end{figure}
+
+\subsection{Opening sequence}
+\label{subsec:dev_pros_opening_seq}
+
 \begin{table}
     \begin{center}
     \begin{tabular}{| l | l | l |}
