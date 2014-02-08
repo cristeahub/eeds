@@ -91,6 +91,27 @@ str r2, [gpio_o, #GPIO_CTRL]
     \end{center}
 \end{table}
 
+\subsection{Reading button status using polling}
+\label{subsec:polling}
+
+The most naive way to use button input, is by reading the input continuously, and writing the input data to the LEDs.
+As seen in Figure \ref{code:polling}, the main loop first loads the data from GPIO\_PC\_DIN.
+It is then shifted 8 bits to the left, and written to GPIO\_PA\_DOUT.
+When the operation is complete, the program branches back to the main\_loop label and thus continues forever.
+The results section will present the differences in power consumption between this method and using interrupts for input checking.
+
+\begin{figure}[h!]
+\begin{code}
+main_loop:
+    ldr r2, [gpio_i, #GPIO_DIN]
+    lsl r2, r2, #8
+    str r2, [gpio_o, #GPIO_DOUT]
+    b main_loop
+\end{code}
+\caption{Naïve continuous checking of input status}
+\label{code:polling}
+\end{figure}
+
 \subsection{Programming with interrupts}
 \label{subsec:dev_pros_interrupts}
 
