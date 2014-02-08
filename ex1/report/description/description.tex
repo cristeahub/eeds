@@ -4,15 +4,18 @@
 \subsection{Development process}
 \label{subsec:development_process}
 
-This chapter details the steps used during the development of the program. All of the development on the EFM32 was done in the computer lab 458 on the forth floor of the Computer Science building (IT-bygget vest). Git was chosen as the version control system, mainly used together wiht GitHub. This meant we were not bound to work on the report inside of the lab.
+This chapter details the steps used during the development of the program. All of the development on the EFM32 was done in the computer lab 458 on the fourth floor of the Computer Science building (IT-bygget vest). Git was chosen as the version control system, mainly used together with GitHub. This meant we were not bound to work on the report inside of the lab.
 
-The development environment for the EFM32 was already set up on the workstations in the lab and connected to USB via an EFM32GG-DK3750 development kit. There was a framework set up with a vector table and some subroutines, so all our resources was going to solve the problem.
+The development environment for the EFM32 was already set up on the workstations in the lab and connected via USB to an EFM32GG-DK3750 development kit. There was a framework set up with a vector table and some subroutines, so all our resources was going towards solving the problem.
 
 The assignment was part of a bigger compendium which contained a lot of useful information. This gave us a quick insight to the different tools that were avaibale to us, as well as an explanation of the problem we needed to solve.
 
-Features of the program was added iteratively. Beginning with simply getting the LEDs to light up and evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsec:dev_pros_opening_seq}. Afterwards a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lighten up.
+Features of the program were added iteratively, beginning with simply getting the LEDs to light up and evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this, an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsec:dev_pros_opening_seq}. Afterwards, a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lightened up.
 
-The next step was to make interrupts work. A main loop was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A gpio handler was implemented to make sure we abort the interrupt as soon as possible, more on this later in \ref{subsec:dev_pros_interrupts}.
+The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A gpio handler was implemented to make sure we abort the interrupt as soon as possible, more on this later in \ref{subsec:dev_pros_interrupts}.
 
 \subsubsection{Setting up the LEDs}
 \label{subsec:dev_pros_setup_led}
+
+\subsubsection{Programming with interrupts}
+\label{dev_pros_interrupts}
