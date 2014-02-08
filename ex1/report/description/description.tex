@@ -11,6 +11,35 @@ Features of the program were added iteratively, beginning with simply getting th
 
 The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A gpio handler was implemented to make sure we abort the interrupt as soon as possible, more on this later in section \ref{subsec:dev_pros_interrupts}.
 
+\subsection{Pre-assignment setup}
+\label{subsec:pre-assingment_setup}
+
+The assignment involves a lot of GPIO usage therefor some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for a simulation of a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from $r0$ to $r7$ is used for variable content. See table \ref{tab:register_design} on page \pageref{tab:register_design} for an overview of the registers.
+
+\begin{table}
+    \begin{center}
+    \begin{tabular}{ | l | l | l | }
+        \hline
+        Register    & Alias     & Usage \\
+        \hline
+        R0          & None      & Variable values\\
+        \vdots      & \vdots    & \vdots \\
+        R7          & None      & Variable values \\
+        \hline
+        R8          & cw        & Wait simulation register \\
+        \hline
+        R9          & gpio\_i   & GPIO\_PC\_BASE \\
+        \hline
+        R10         & gpio\_o   & GPIO\_PA\_BASE \\
+        \hline
+        R11         & gpio      & GPIO\_BASE \\
+        \hline
+    \end{tabular}
+    \caption{Register design}
+    \label{tab:register_design}
+    \end{center}
+\end{table}
+
 \subsection{Setting up the LEDs}
 \label{subsec:dev_pros_setup_led}
 
