@@ -41,7 +41,7 @@ _reset:
     orr r2, r2, r3
     lsl r3, r3, #CMU_LFCLKSEL_LFBE
     orr r2, r2, r3
-    and r2, r2, =0b0000
+    and r2, r2, #0x0
     str r2, [r1, #CMU_LFCLKSEL]
 
 
