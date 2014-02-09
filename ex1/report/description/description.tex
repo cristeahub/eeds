@@ -47,7 +47,7 @@ str r2, [gpio_o, #GPIO_CTRL]
 \label{code:set_drive_gpio_o}
 \end{figure}
 
-The pins on the game pad is connected to the top 8 pins on the EFM32GG-DK3750 development kit. The constant 0x55555555 is written to the $GPIO\_PA\_MODEH$ register, this so the pins is set to output.
+The pins on the game pad is connected to the top 8 pins on the EFM32GG-DK3750 development kit. The constant 0x55555555 is written to the GPIO\_PA\_MODEH register, this so the pins is set to output.
 
 \begin{figure}[h!]
 \begin{code}
@@ -62,7 +62,7 @@ str r2, [gpio_o, #GPIO_MODEH]
 \label{subsec:dev_pros_button_setup}
 The program itself has a boot sequence after the LEDs are set up, the details of this can be read in section \ref{subsec:dev_pros_opening_seq}.
 
-The next operation sets the gamepad buttons up for input. All of the setup has been done by the setup of the LEDs, so there is no need for that. To enable the pins for input, writing 0x33333333 to $GPIO\_PC\_MODEL$ is needed. To enable internal pull-up 0xff is written to $GPIO\_PC\_DOUT$. After this the buttons pressed in can be read from bits 0-7 of $GPIO\_PC\_DIN$ and the LEDs will light up by writing to bits 8-15 of $GPIO\_PA\_DOUT$.
+The next operation sets the gamepad buttons up for input. All of the setup has been done by the setup of the LEDs, so there is no need for that. To enable the pins for input, writing 0x33333333 to GPIO\_PC\_MODEL is needed. To enable internal pull-up 0xff is written to GPIO\_PC\_DOUT. After this the buttons pressed in can be read from bits 0-7 of GPIO\_PC\_DIN and the LEDs will light up by writing to bits 8-15 of GPIO\_PA\_DOUT.
 
 \begin{figure}[h!]
 \begin{code}
@@ -92,11 +92,11 @@ The opening sequence uses a lot of power, but this is mostly due to its long dur
 
 To make the LEDs light up one by one with a small timeframe in between, a casual wait loop was created. This loop simulates a wait by branching out to a loop and subtracting a small value from a large number. It then checks if the result is zero, if not it repeats the process. With a large enough number this will take a small fraction of a second which is exactly what is needed. A special register cw is reseved for this purpose. See figure \ref{code:casual_wait}.
 
-To light up the LEDs, different values are written to $GPIO\_PA\_DOUT$. After a value is written, one iteration of the casual wait is performed. To make the lights light up and down in a row, a simple bitshift is done to the right and the left respectively. The end effect is a bigger one. It needs all lights to be shut off at the start and has the following formula.
+To light up the LEDs, different values are written to GPIO\_PA\_DOUT. After a value is written, one iteration of the casual wait is performed. To make the lights light up and down in a row, a simple bitshift is done to the right and the left respectively. The end effect is a bigger one. It needs all lights to be shut off at the start and has the following formula.
 
 $$ \texttt{out = ((out \& 0xf000) << 1 | (out \& 0x0f00) >> 1) \& 0xff00} $$
 
-Out in the formula is in our case $GPIO\_PA\_DOUT$.
+Out in the formula is in our case GPIO\_PA\_DOUT.
 
 
 \begin{figure}[h!]
