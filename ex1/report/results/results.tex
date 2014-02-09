@@ -4,15 +4,15 @@ There were an opening sequence and two versions of the program implemented; one 
 
 \subsection{Implications of an opening sequence}
 
-When no opening sequence is present, the power consumption of the device is approximately 370 \si{\micro\ampere} over very few clock cycles, see figure \ref{fig:no_opening_seq} in appendix B on site \pageref{fig:no_opening_seq}. When there is an opening sequence the power consumption for the device is approximately 4.3 \si{\milli\ampere} over multiple seconds, see figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}. Because of this there is a significant power usage if the opening sequence is present.
+When no opening sequence is present, the power consumption of the device is approximately 370 \si{\micro\ampere} over very few clock cycles, see Figure \ref{fig:no_opening_seq} in appendix B on site \pageref{fig:no_opening_seq}. When there is an opening sequence, the power consumption for the device is approximately 4.3 \si{\milli\ampere} over multiple seconds, see Figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}. Because of this, there is a significant power usage if the opening sequence is present.
 
 The opening sequence is meant for the user. Most of the devices with an architecture like the one we are programming for, are devices that needs to live a long time with mostly no interaction, but when they are told to work, it's crucial that they do. Therefore an opening sequence will be beneficial. If one of the LEDs in this case is faulty, one can see it when booting up the device rather than later. It might be, if the device is designed for an alarm, that the alam will never play and no feedback will be given.
 
-The opening sequence uses a lot of power, but this is mostly due to its long duration. One way to improve it would be to shorten it while still testing all LEDs in a fashion easy understandable by a human being. If the system is suppose to be on for a long time, for instance multiple years, then the power consumption of the opening sequence in this case is not so crucial. The longer the device is one, the more negligible the opening sequence becomes.
+The opening sequence uses a lot of power, but this is mostly due to its long duration. One way to improve it would be to shorten it while still testing all LEDs in a fashion easy understandable by a human being. If the system is suppose to be on for a long time, for instance multiple years, then the power consumption of the opening sequence in this case is not so crucial. The longer the device is on, the more negligible the opening sequence becomes.
 
 \subsection{Polling}
 
-See figure \ref{fig:polling_io} in the appendices for the power consumption while using polling. The energy usage is constantly quite high, on about 3.51 mA. The difference in power usage between input processing and when there's no input is minimal.
+See Figure \ref{fig:polling_io} in the appendices for the power consumption while using polling. The energy usage is constantly quite high, on about 3.51 mA. The difference in power usage between input processing and when there's no input is minimal.
 
 Average current while idling: 3.51 mA.
 
@@ -23,16 +23,16 @@ Because the CPU can be woken up from sleep upon interrupts, it is able to sleep 
 
 \subsubsection{With energy mode 1}
 
-See figure \ref{fig:interrupt_io} in the appendices for the power consumption while using interrupts without deep sleep.
+See Figure \ref{fig:interrupt_io} in the appendices for the power consumption while using interrupts without deep sleep.
 
 Average current while idling: 1.19 mA.
 
 \subsubsection{With energy mode 2}
 
-See figure \ref{fig:interrupt_io_deep_sleep} in the appendices for the power consumption while using interrupts with energy mode 2. The different stages of the program are marked as follows:
+See Figure \ref{fig:interrupt_io_deep_sleep} in the appendices for the power consumption while using interrupts with energy mode 2. The different stages of the program are marked as follows:
 
 Average current while idling: 2.17$\mu$A.
 
 \subsection{Comparison}
 
-See Figure \ref{tab:comparison} in Appendix A for the comparison of the values. One can see that the difference between interrupt with energy mode 1 and interrupt with energy mode 2 is way larger than the difference between interrupt with energy mode 1 and polling. According to our test results, interrupt with energy mode 1 is three times less power consuming than polling, and interrupting with energy mode 2 is an impressive 1617 times, or three orders of magnitude, more power consuming than interrupt with energy mode 1!
+See Figure \ref{tab:comparison} in Appendix A for the comparison of the values. One can see that the difference between interrupt with energy mode 1 and interrupt with energy mode 2 is way larger than the difference between interrupt with energy mode 1 and polling. According to our test results, interrupt with energy mode 1 is three times less power consuming than polling, and interrupting with energy mode 2 is an impressive 1617 times, or three orders of magnitude, less power consuming than interrupt with energy mode 1!
