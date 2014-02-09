@@ -19,7 +19,7 @@ The assignment involves a lot of GPIO usage, and therefore some values are used 
 \subsection{Setting up the LEDs}
 \label{subsec:dev_pros_setup_led}
 
-The LEDs are connected to the EFM32 through the GPIO. To enable the GPIO, the clock needs to be enabled for the GPIO controller. The CMU is responsible for the clock and is fortunately very easy to use. Register $CMU\_HFPERCLKEN0$ is a 32 bits register with each bit correponding to a specific IO controller. The GPIO controller is on the 13th bit, and after that bit has been set to 1, the GPIO is ready for use.
+The LEDs are connected to the EFM32 through the GPIO. To enable the GPIO, the clock needs to be enabled for the GPIO controller. The CMU is responsible for the clock and is fortunately very easy to use. Register CMU\_HFPERCLKEN0 is a 32 bits register with each bit correponding to a specific IO controller. The GPIO controller is on the 13th bit, and after that bit has been set to 1, the GPIO is ready for use.
 
 \begin{figure}[h!]
 \begin{code}
