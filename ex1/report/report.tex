@@ -32,8 +32,35 @@
 \numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
 \numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
 
-\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+%------ Listings --------------
+\usepackage{color}
+\definecolor{light-gray}{gray}{0.95}
+\usepackage{listings}
 
+\lstnewenvironment{code}[1][]%
+{\minipage{\linewidth}
+\lstset{ %
+language={[x86masm]Assembler},  % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+resetmargins=true,              % reset line numbers
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,                   % adds a frame around the code
+tabsize=2,                      % sets default tabsize to 2 spaces
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)},         % if you want to add a comment within your code
+morekeywords={orr, ldr},         % additional keywords to expand the asm language
+#1
+}}%
+{\endminipage}
 %----------------------------------------------------------------------------------------
 %   TITLE SECTION
 %----------------------------------------------------------------------------------------
@@ -49,7 +76,7 @@ TDT4258 \\
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
 
-\author{Stian Jensen\\Asbjørn Ottesen Steinskog\\Christoffer Cristea Tønnessen}
+\author{Stian Jensen\\Asbjørn Ottesen Steinskog\\Christoffer Tønnessen}
 
 \date{\normalsize\today}
 
@@ -106,6 +133,11 @@ TDT4258 \\
 
 %REFERENCES
 \input{references/references.tex}
+
+\newpage
+
+%APPENDIX A
+\input{appendix/a.tex}
 
 
 \end{document}
