@@ -1,0 +1,48 @@
+\section{Appendix A}
+\label{appenix:a}
+
+This appendix includes supplimentary tables for the report.
+
+\begin{table}[ht!]
+    \begin{center}
+    \begin{tabular}{| l | l | l |}
+        \hline
+        Value   & Mode      & Description \\
+        \hline
+        0       & STANDARD  & 6 mA drive current \\
+        \hline
+        1       & LOWEST    & 0.5 mA drive current \\
+        \hline
+        2       & HIGH      & 20 mA drive current \\
+        \hline
+        3       & LOW       & 2 mA drive current \\
+        \hline
+    \end{tabular}
+    \caption{Drive strength on the EFM32 GPIO}
+    \label{tab:drive_strength}
+    \end{center}
+\end{table}
+
+\begin{table}[ht!]
+    \begin{center}
+    \begin{tabular}{ | l | l | l | }
+        \hline
+        Register    & Alias     & Usage \\
+        \hline
+        R0          & None      & Variable values\\
+        \vdots      & \vdots    & \vdots \\
+        R7          & None      & Variable values \\
+        \hline
+        R8          & cw        & Wait simulation register \\
+        \hline
+        R9          & gpio\_i   & GPIO\_PC\_BASE \\
+        \hline
+        R10         & gpio\_o   & GPIO\_PA\_BASE \\
+        \hline
+        R11         & gpio      & GPIO\_BASE \\
+        \hline
+    \end{tabular}
+    \caption{Register design}
+    \label{tab:register_design}
+    \end{center}
+\end{table}

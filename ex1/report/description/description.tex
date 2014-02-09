@@ -14,31 +14,7 @@ The next step was to make interrupts work. A main function was constructed to se
 \subsection{Pre-assignment setup}
 \label{subsec:pre-assingment_setup}
 
-The assignment involves a lot of GPIO usage therefor some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for a simulation of a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} on page \pageref{tab:register_design} for an overview of the registers.
-
-\begin{table}
-    \begin{center}
-    \begin{tabular}{ | l | l | l | }
-        \hline
-        Register    & Alias     & Usage \\
-        \hline
-        R0          & None      & Variable values\\
-        \vdots      & \vdots    & \vdots \\
-        R7          & None      & Variable values \\
-        \hline
-        R8          & cw        & Wait simulation register \\
-        \hline
-        R9          & gpio\_i   & GPIO\_PC\_BASE \\
-        \hline
-        R10         & gpio\_o   & GPIO\_PA\_BASE \\
-        \hline
-        R11         & gpio      & GPIO\_BASE \\
-        \hline
-    \end{tabular}
-    \caption{Register design}
-    \label{tab:register_design}
-    \end{center}
-\end{table}
+The assignment involves a lot of GPIO usage therefor some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for a simulation of a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} in appendix A on page \pageref{tab:register_design} for an overview of the registers.
 
 \subsection{Setting up the LEDs}
 \label{subsec:dev_pros_setup_led}
@@ -60,7 +36,7 @@ str r2, [r1, #CMU_HFPERCLKEN0]
 \label{code:enable_cmu_gpio}
 \end{figure}
 
-The GPIO has multiple connections and the game pad is connected so that button presses are registered on the C connection and which lights should be on is read from the A connection. Following this, the drive strength of the light is set on the A connection. This can take one of four values, each of which corresponds to a different Ampère setting. Table \ref{tab:drive_strength} on page \pageref{tab:drive_strength} shows the different settings for drive strength. To save power the strength should be set as low as possible, but for this assignment the power consumption of the LEDs are ignored and therefor the drive strength is set to high.
+The GPIO has multiple connections and the game pad is connected so that button presses are registered on the C connection and which lights should be on is read from the A connection. Following this, the drive strength of the light is set on the A connection. This can take one of four values, each of which corresponds to a different Ampère setting. Table \ref{tab:drive_strength} in appendix A on page \pageref{tab:drive_strength} shows the different settings for drive strength. To save power the strength should be set as low as possible, but for this assignment the power consumption of the LEDs are ignored and therefor the drive strength is set to high.
 
 \begin{figure}[h!]
 \begin{code}
@@ -102,25 +78,6 @@ str r2, [gpio_i, #GPIO_DOUT]
 \subsection{Opening sequence}
 \label{subsec:dev_pros_opening_seq}
 
-\begin{table}
-    \begin{center}
-    \begin{tabular}{| l | l | l |}
-        \hline
-        Value   & Mode      & Description \\
-        \hline
-        0       & STANDARD  & 6 mA drive current \\
-        \hline
-        1       & LOWEST    & 0.5 mA drive current \\
-        \hline
-        2       & HIGH      & 20 mA drive current \\
-        \hline
-        3       & LOW       & 2 mA drive current \\
-        \hline
-    \end{tabular}
-    \caption{Drive strength on the EFM32 GPIO}
-    \label{tab:drive_strength}
-    \end{center}
-\end{table}
 
 \subsection{Reading button status using polling}
 \label{subsec:polling}
