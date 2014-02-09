@@ -78,13 +78,39 @@ str r2, [gpio_i, #GPIO_DOUT]
 \subsection{Opening sequence}
 \label{subsec:dev_pros_opening_seq}
 
-The program provides an opening sequence testing the LEDs for the convinience of the user. This subsection outlines the sollution and implications it provides.
+The program provides an opening sequence testing the LEDs for the convinience of the user. This subsection outlines the implementation of the opening sequence and implications it provides. A slow motion YouTube video of the opening sequence is available at: http://youtu.be/PJpPFoC9Jtg . The video is four times slower than real life.
 
 \subsubsection{Implications of an opening sequence}
 
-When no opening sequence is present the power consumption of the device is approximately 370 \si{\micro\ampere}, see figure \ref{fig:no_opening_seq} in appendix B on site \pageref{fig:no_opening_seq}. When there is an opening sequence the power consumption for the device is approximately 4.3 \si{\milli\ampere}, see figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}.
+When no opening sequence is present the power consumption of the device is approximately 370 \si{\micro\ampere} over very few clock cycles, see figure \ref{fig:no_opening_seq} in appendix B on site \pageref{fig:no_opening_seq}. When there is an opening sequence the power consumption for the device is approximately 4.3 \si{\milli\ampere} over multiple seconds, see figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}. Because of this there is a significant power usage if the opening sequence is present.
+
+The opening sequence is meant for the user. Most of the devices with an architecture like the one we are programming for are devices that needs to live a long time with mostly no interaction, but when they are told to work, it's crucial that they do. Therefor an opening sequence will be beificial. If one of the LEDs in this case is faulty, one can see it when booting up the device rather than later. It might be if the device is designed for an alarm that the alam will never play and no feedback will be given.
+
+The opening sequence uses a lot of power, but this is mostly due to its long duration. One way to improve it would be to shorten it while still testing all LEDs in a fashion easy understandable by a human being. If the system is suppose to be on for a long time, for instance multiple years, then the power consumption of the opening sequence in this case is not so crucial. The longer the device is one, the more negligible the opening sequence becomes.
 
 \subsubsection{Implementation}
+
+To make the LEDs light up one by one with a small timeframe in between a casual wait loop was created. This loop simulates a wait by brancing out to a loop and subtracting a small value from a large number. It then checks if the result is zero, if not it subtracts one again and so on. With a large enough number this will take a small fraction of a second which is exactly what is needed. A special register cw is reseved for this purpose. See figure \ref{code:casual_wait}.
+
+To light up the LEDs different values are written to $GPIO\_PA\_DOUT$. After a value is written one iteration of the casual wait is preformed. To make the lights light up and down in a row a simple bitshift is done to the right and the left respectively. The end effect is a bigger one. It needs all lights to be shut off at the start and has the following formulae.
+
+$$ \texttt{out = ((out \& 0xf000) << 1 | (out \& 0x0f00) >> 1) \& 0xff00} $$
+
+Out in the formulae is in our case $GPIO\_PA\_DOUT$.
+
+
+\begin{figure}[h!]
+\begin{code}
+casual_wait:
+    mov cw, #00x00a0000
+cwait_loop:
+    subs cw, #1
+    bne cwait_loop
+    bx lr
+\end{code}
+\caption{Casual wait – simulating a wait for the LED test}
+\label{code:casual_wait}
+\end{figure}
 
 \subsection{Reading button status using polling}
 \label{subsec:polling}
