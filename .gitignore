@@ -1,8 +1,8 @@
-## Other files
-assets/
-
 ## VIM
 *.sw*
+
+## DS STORE PIECE OF SHIT
+.DS_Store
 
 ## Produced files
 *.bin

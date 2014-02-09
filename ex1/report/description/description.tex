@@ -78,6 +78,13 @@ str r2, [gpio_i, #GPIO_DOUT]
 \subsection{Opening sequence}
 \label{subsec:dev_pros_opening_seq}
 
+The program provides an opening sequence testing the LEDs for the convinience of the user. This subsection outlines the sollution and implications it provides.
+
+\subsubsection{Implications of an opening sequence}
+
+When no opening sequence is present the power consumption of the device is approximately 370 \si{\micro\ampere}, see figure \ref{fig:no_opening_seq} in appendix B on site \pageref{fig:no_opening_seq}. When there is an opening sequence the power consumption for the device is approximately 4.3 \si{\milli\ampere}, see figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}.
+
+\subsubsection{Implementation}
 
 \subsection{Reading button status using polling}
 \label{subsec:polling}
