@@ -5,20 +5,19 @@ As mentioned in the description section, we implemented two versions of this pro
 \subsection{Polling}
 
 See figure \ref{fig:polling_io} in the appendices for the power consumption while using polling. The energy usage is constantly quite high, on about 3.51 mA. The difference in power usage between input processing and when there's no input is minimal.
-The different stages of the program are marked as follows:
 
 Average current while idling: 3.51 mA.
 
 \subsection{Interrupt}
 
-Interrupts should result in a more energy-friendly power usage than polling. Below follows results for the two test.
+Interrupts should result in a more energy-friendly power usage than polling.
 Because the CPU can be woken up from sleep upon interrupts, it is able to sleep and use very small amounts of power when there is no processing to be done. Interrupt driven I/O has been implemented with two different energy modes during sleeping.
 
 \subsubsection{With energy mode 1}
 
-See figure \ref{fig:interrupt_io} in the appendices for the power consumption while using intterrupts without deep sleep. The different stages of the program are marked as follows:
+See figure \ref{fig:interrupt_io} in the appendices for the power consumption while using interrupts without deep sleep.
 
-Average current while idling: 1.19mA.
+Average current while idling: 1.19 mA.
 
 \subsubsection{With energy mode 2}
 
