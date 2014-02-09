@@ -1,7 +1,7 @@
 .PHONY: all
 all:
 	pdflatex report.tex
-	bibtex report
+	bibtex report.aux
 	pdflatex report.tex
 	pdflatex report.tex
 
