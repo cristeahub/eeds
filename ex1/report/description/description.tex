@@ -9,21 +9,21 @@ The assignment was part of a bigger compendium which contained a lot of useful i
 
 Features of the program were added iteratively, beginning with simply getting the LEDs to light up and evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this, an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsec:dev_pros_opening_seq}. Afterwards, a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lightened up.
 
-The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A gpio handler was implemented to make sure we abort the interrupt as soon as possible, more on this later in section \ref{subsec:dev_pros_interrupts}.
+The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A GPIO handler was implemented to make sure the interrupt was aborted as quickly as possible. More on this in section \ref{subsec:dev_pros_interrupts}.
 
 \subsection{Pre-assignment setup}
 \label{subsec:pre-assingment_setup}
 
-The assignment involves a lot of GPIO usage therefor some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for a simulation of a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} in appendix A on page \pageref{tab:register_design} for an overview of the registers.
+The assignment involves a lot of GPIO usage, and therefore some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for simulating a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} in appendix A on page \pageref{tab:register_design} for an overview of the registers.
 
 \subsection{Setting up the LEDs}
 \label{subsec:dev_pros_setup_led}
 
-The LEDs are connected to the EFM32 through the GPIO. To enable the GPIO, the clock needs to be enabled for the GPIO controller. The CMU is responsible for the clock and is fortunantly very easy to use. Register $CMU\_HFPERCLKEN0$ is a 32 bits register with each bit correponding to a specific IO controller. The GPIO controller is on the 13th bit, after that bit has been set to 1 the GPIO is ready for use.
+The LEDs are connected to the EFM32 through the GPIO. To enable the GPIO, the clock needs to be enabled for the GPIO controller. The CMU is responsible for the clock and is fortunately very easy to use. Register $CMU\_HFPERCLKEN0$ is a 32 bits register with each bit correponding to a specific IO controller. The GPIO controller is on the 13th bit, and after that bit has been set to 1, the GPIO is ready for use.
 
 \begin{figure}[h!]
 \begin{code}
-// C-eqvivalent:
+// C-equivalent:
 // *CMU_HFPERCLKEN0 |= (1 << 13)
 ldr r1, =CMU_BASE
 ldr r2, [r1, #CMU_HFPERCLKEN0]
@@ -36,7 +36,7 @@ str r2, [r1, #CMU_HFPERCLKEN0]
 \label{code:enable_cmu_gpio}
 \end{figure}
 
-The GPIO has multiple connections and the game pad is connected so that button presses are registered on the C connection and which lights should be on is read from the A connection. Following this, the drive strength of the light is set on the A connection. This can take one of four values, each of which corresponds to a different Ampère setting. Table \ref{tab:drive_strength} in appendix A on page \pageref{tab:drive_strength} shows the different settings for drive strength. To save power the strength should be set as low as possible, but for this assignment the power consumption of the LEDs are ignored and therefor the drive strength is set to high.
+The GPIO has multiple connections. The game pad is connected so that button presses are registered on the C connection and which lights should be on is read from the A connection. Following this, the drive strength of the light is set on the A connection. This can take one of four values, each corresponding to a different Ampère setting. Table \ref{tab:drive_strength} in appendix A on page \pageref{tab:drive_strength} shows the different settings for drive strength. To save power, the strength should be set as low as possible, but for this assignment the power consumption of the LEDs are ignored and therefore the drive strength is set to high.
 
 \begin{figure}[h!]
 \begin{code}
@@ -62,7 +62,7 @@ str r2, [gpio_o, #GPIO_MODEH]
 \label{subsec:dev_pros_button_setup}
 The program itself has a boot sequence after the LEDs are set up, the details of this can be read in section \ref{subsec:dev_pros_opening_seq}.
 
-The next operation sets the gamepad buttons up for input. All of the setup has been done by the setup of the LEDs, so there is no need for that. To enable the poins for input writing 0x33333333 to $GPIO\_PC\_MODEL$ is needed. To enable internal pull-up 0xff is written to $GPIO\_PC\_DOUT$. After this the buttons pressed in can be read from bits 0-7 of $GPIO\_PC\_DIN$ and the LEDs will light up by writing to bits 8-15 of $GPIO\_PA\_DOUT$.
+The next operation sets the gamepad buttons up for input. All of the setup has been done by the setup of the LEDs, so there is no need for that. To enable the pins for input, writing 0x33333333 to $GPIO\_PC\_MODEL$ is needed. To enable internal pull-up 0xff is written to $GPIO\_PC\_DOUT$. After this the buttons pressed in can be read from bits 0-7 of $GPIO\_PC\_DIN$ and the LEDs will light up by writing to bits 8-15 of $GPIO\_PA\_DOUT$.
 
 \begin{figure}[h!]
 \begin{code}
@@ -78,25 +78,25 @@ str r2, [gpio_i, #GPIO_DOUT]
 \subsection{Opening sequence}
 \label{subsec:dev_pros_opening_seq}
 
-The program provides an opening sequence testing the LEDs for the convinience of the user. This subsection outlines the implementation of the opening sequence and implications it provides. A slow motion YouTube video of the opening sequence is available at: \url{http://youtu.be/PJpPFoC9Jtg}. The video is four times slower than real life.
+The program provides an opening sequence testing the LEDs for the convenience of the user. This subsection outlines the implementation of the opening sequence and implications it provides. A slow motion YouTube video of the opening sequence is available at: \url{http://youtu.be/PJpPFoC9Jtg}. The video is four times slower than real life.
 
 \subsubsection{Implications of an opening sequence}
 
-When no opening sequence is present the power consumption of the device is approximately 370 \si{\micro\ampere} over very few clock cycles, see figure \ref{fig:no_opening_seq} in appendix B on site \pageref{fig:no_opening_seq}. When there is an opening sequence the power consumption for the device is approximately 4.3 \si{\milli\ampere} over multiple seconds, see figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}. Because of this there is a significant power usage if the opening sequence is present.
+When no opening sequence is present, the power consumption of the device is approximately 370 \si{\micro\ampere} over very few clock cycles, see figure \ref{fig:no_opening_seq} in appendix B on site \pageref{fig:no_opening_seq}. When there is an opening sequence the power consumption for the device is approximately 4.3 \si{\milli\ampere} over multiple seconds, see figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}. Because of this there is a significant power usage if the opening sequence is present.
 
-The opening sequence is meant for the user. Most of the devices with an architecture like the one we are programming for are devices that needs to live a long time with mostly no interaction, but when they are told to work, it's crucial that they do. Therefor an opening sequence will be beificial. If one of the LEDs in this case is faulty, one can see it when booting up the device rather than later. It might be if the device is designed for an alarm that the alam will never play and no feedback will be given.
+The opening sequence is meant for the user. Most of the devices with an architecture like the one we are programming for, are devices that needs to live a long time with mostly no interaction, but when they are told to work, it's crucial that they do. Therefore an opening sequence will be beneficial. If one of the LEDs in this case is faulty, one can see it when booting up the device rather than later. It might be, if the device is designed for an alarm, that the alam will never play and no feedback will be given.
 
 The opening sequence uses a lot of power, but this is mostly due to its long duration. One way to improve it would be to shorten it while still testing all LEDs in a fashion easy understandable by a human being. If the system is suppose to be on for a long time, for instance multiple years, then the power consumption of the opening sequence in this case is not so crucial. The longer the device is one, the more negligible the opening sequence becomes.
 
 \subsubsection{Implementation}
 
-To make the LEDs light up one by one with a small timeframe in between a casual wait loop was created. This loop simulates a wait by brancing out to a loop and subtracting a small value from a large number. It then checks if the result is zero, if not it subtracts one again and so on. With a large enough number this will take a small fraction of a second which is exactly what is needed. A special register cw is reseved for this purpose. See figure \ref{code:casual_wait}.
+To make the LEDs light up one by one with a small timeframe in between, a casual wait loop was created. This loop simulates a wait by branching out to a loop and subtracting a small value from a large number. It then checks if the result is zero, if not it repeats the process. With a large enough number this will take a small fraction of a second which is exactly what is needed. A special register cw is reseved for this purpose. See figure \ref{code:casual_wait}.
 
-To light up the LEDs different values are written to $GPIO\_PA\_DOUT$. After a value is written one iteration of the casual wait is preformed. To make the lights light up and down in a row a simple bitshift is done to the right and the left respectively. The end effect is a bigger one. It needs all lights to be shut off at the start and has the following formulae.
+To light up the LEDs, different values are written to $GPIO\_PA\_DOUT$. After a value is written, one iteration of the casual wait is performed. To make the lights light up and down in a row, a simple bitshift is done to the right and the left respectively. The end effect is a bigger one. It needs all lights to be shut off at the start and has the following formula.
 
 $$ \texttt{out = ((out \& 0xf000) << 1 | (out \& 0x0f00) >> 1) \& 0xff00} $$
 
-Out in the formulae is in our case $GPIO\_PA\_DOUT$.
+Out in the formula is in our case $GPIO\_PA\_DOUT$.
 
 
 \begin{figure}[h!]
@@ -115,7 +115,7 @@ cwait_loop:
 \subsection{Reading button status using polling}
 \label{subsec:polling}
 
-The most naive way to use button input, is by reading the input continuously, and writing the input data to the LEDs.
+The most naive way to use button input, is by reading the input continuously and writing the input data to the LEDs.
 As seen in Figure \ref{code:polling}, the main loop first loads the data from GPIO\_PC\_DIN.
 It is then shifted 8 bits to the left, and written to GPIO\_PA\_DOUT.
 When the operation is complete, the program branches back to the main\_loop label and thus continues forever.
