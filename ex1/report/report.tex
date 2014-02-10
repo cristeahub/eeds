@@ -31,6 +31,12 @@
     urlcolor=black
 }
 
+\fancypagestyle{firststyle}
+{
+  \fancyhf{}
+  \fancyfoot[R]{\thepage}
+}
+
 \input{alphasection.tex}
 
 \numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
@@ -83,15 +89,18 @@ TDT4258 \\
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
 
-\author{Stian Jensen\\Asbjørn Ottesen Steinskog\\Christoffer Tønnessen}
+\author{GROUP 6:\\Stian Jensen\\Asbjørn Ottesen Steinskog\\Christoffer Tønnessen}
 
-\date{\normalsize\today}
+\date{\normalsize February 9, 2014}
 
 \begin{document}
+
 
 \pagenumbering{roman}
 
 \maketitle
+
+\thispagestyle{firststyle}
 
 \newpage
 
