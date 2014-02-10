@@ -1,6 +1,11 @@
 ## VIM
 *.sw*
 
+## Archives
+*.zip
+*.tar.gz
+*.gz
+
 ## DS STORE PIECE OF SHIT
 .DS_Store
 
