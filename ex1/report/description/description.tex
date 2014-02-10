@@ -9,7 +9,7 @@ The assignment was part of a bigger compendium \cite{eeds-compendium} which cont
 
 Features of the program were added iteratively, beginning with simply getting the LEDs to light up and then evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this, an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsec:dev_pros_opening_seq}. Afterwards, a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lightened up.
 
-The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A GPIO handler was implemented to make sure the interrupt was aborted as quickly as possible. More on this in section \ref{subsec:dev_pros_interrupts}.
+The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A main focus was to abort the interrupts as quickly as possible. More on this in section \ref{subsec:dev_pros_interrupts}.
 
 \subsection{Pre-assignment setup}
 \label{subsec:pre-assingment_setup}
@@ -94,7 +94,7 @@ Out in the formula is in our case GPIO\_PA\_DOUT.
 \begin{figure}[h!]
 \begin{code}
 casual_wait:
-    mov cw, #00x00a0000
+    mov cw, #0x000a0000
 cwait_loop:
     subs cw, #1
     bne cwait_loop
