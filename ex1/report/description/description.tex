@@ -1,20 +1,14 @@
 \section{Development process and implementation}
 \label{chap:development_process}
 
-This chapter details the steps used during the development of the program. All of the development on the EFM32 was done in the computer lab 458 on the fourth floor of the Computer Science building (IT-bygget vest). Git was chosen as the version control system, mainly used together with GitHub. This meant we were not bound to work on the report inside of the lab.
-
-The development environment for the EFM32 was already set up on the workstations in the lab and connected via USB to an EFM32GG-DK3750 development kit. There was a framework set up with a vector table and some subroutines, so all our resources was going towards solving the problem.
-
-The assignment was part of a bigger compendium \cite{eeds-compendium} which contained a lot of useful information. This gave us a quick insight to the different tools that were avaibale to us, as well as an explanation of the problem we needed to solve.
-
-Features of the program were added iteratively, beginning with simply getting the LEDs to light up and then evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this, an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsec:dev_pros_opening_seq}. Afterwards, a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lightened up.
+This chapter details the steps used during the development of the program. Features of the program were added iteratively, beginning with simply getting the LEDs to light up and then evolving to more sophisticated funcionality. The first iteration of the code simply turned on the LEDs. After this, an opening sequence was added to the program, the details of which and why it was added is explained more in section \ref{subsec:dev_pros_opening_seq}. Afterwards, a polling technique was used to test the buttons on the game pad. With the correct flags set a number will be written to a specific location in memory which indicates what buttons are being pressed. This number is then shifted eight places to the left to comply with the way LEDs are lightened up.
 
 The next step was to make interrupts work. A main function was constructed to set the correct flags. When these are set the device goes to sleep and waits for an interrupt. A main focus was to abort the interrupts as quickly as possible. More on this in section \ref{subsec:dev_pros_interrupts}.
 
 \subsection{Pre-assignment setup}
 \label{subsec:pre-assingment_setup}
 
-The assignment involves a lot of GPIO usage, and therefore some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for simulating a wait for the opening sequence. They each have an alias to be easier to access. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} in appendix A on page \pageref{tab:register_design} for an overview of the registers.
+The assignment involves a lot of GPIO usage, and therefore some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for simulating a wait for the opening sequence. They each have an alias to be easier to access. GPIO\_PA\_BASE was renamed gpio\_o and GPIO\_PC\_BASE was renamed to gpio\_i, GPIO\_BASE was renamed gpio. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} in appendix A on page \pageref{tab:register_design} for an overview of the registers.
 
 \subsection{Setting up the LEDs}
 \label{subsec:dev_pros_setup_led}
