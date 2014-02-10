@@ -12,7 +12,9 @@ The opening sequence uses a lot of power, but this is mostly due to its long dur
 
 \subsection{Comparison}
 
-See Table \ref{tab:comparison} in Appendix A for the comparison of the values. One can see that the difference between interrupt with energy mode 1 and interrupt with energy mode 2 is way larger than the difference between interrupt with energy mode 1 and polling. According to our test results, interrupt with energy mode 1 is three times less power consuming than polling, and interrupting with energy mode 2 is an impressive 1617 times, or three orders of magnitude, less power consuming than interrupt with energy mode 1!
+The comparison of the different values are shown in table \ref{tab:energy_usage}.
+One major point one can see from the table is that the biggest difference is between energy mode 1 and energy mode 2. This difference is way lager than energy mode 1 and polling. An interrupt in energy mode 2 is 1617 times less power consuming than polling or interrupts in energy mode 1.
+A more detailed view of each energy level is shown in appendix B on page \pageref{appendix:b}.
 
 \begin{table}[ht!]
     \begin{center}
@@ -32,6 +34,3 @@ See Table \ref{tab:comparison} in Appendix A for the comparison of the values. O
     \end{center}
 \end{table}
 
-See Table \ref{tab:energy_usage} for the comparison of the values.
-One can see that the difference between interrupt with energy mode 1 and interrupt with energy mode 2 is way larger than the difference between interrupt with energy mode 1 and polling.
-According to our test results, interrupt with energy mode 1 is three times less power consuming than polling, and interrupting with energy mode 2 is an impressive 1617 times, or three orders of magnitude, less power consuming than interrupt with energy mode 1!
