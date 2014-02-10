@@ -34,6 +34,16 @@ _reset:
     orr r2, r2, r3
     str r2, [r1, #CMU_HFPERCLKEN0]
 
+    // DISABLE LFA AND LFB
+    ldr r2, [r1, #CMU_LFCLKSEL]
+    mov r3, #1
+    lsl r3, r3, #CMU_LFCLKSEL_LFAE
+    orr r2, r2, r3
+    lsl r3, r3, #CMU_LFCLKSEL_LFBE
+    orr r2, r2, r3
+    and r2, r2, #0x0
+    str r2, [r1, #CMU_LFCLKSEL]
+
 
     // set high drive_strength
     mov r2, #0x2

@@ -49,6 +49,11 @@ CMU_HFPERCLKEN0 = 0x044
 
 CMU_HFPERCLKEN0_GPIO = 13
 
+CMU_LFCLKSEL = 0x028
+
+CMU_LFCLKSEL_LFAE = 16
+CMU_LFCLKSEL_LFBE = 20
+
 //////////////////////////////////////////////////////////////////////
 // NVIC
 
