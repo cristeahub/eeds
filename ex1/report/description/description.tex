@@ -179,3 +179,20 @@ str r2, [r3, #0]
 \caption{Enabling both deep sleep and sleep on exit}
 \label{code:deep_sleep_on_exit}
 \end{figure}
+
+\subsection{Energy Mode 4}
+\label{subsec:em4}
+
+There is an energy mode 4 that the EFM32 supports. This mode uses next to no power and disables most of the controllers, but this doesn't come for free. EM4 disables so many key components that it's impossible to wake it up again via the interrupts used in energy mode 2.
+
+One sollution would be to have an extra hardware expansion from each button directly to the interrupt handler that wakes the microcontroller up from EM4. This is not so practical for every application and even in this instance is more than a slight impracticality.
+
+Even if the interrupt was easier to handle EM4 would not be desired for this use. The buttons are most likely going to be pressed multiple times within a small time interval. The graph on Figure \ref{fig:em4} taken from EFM32 Energy Optimization Application Note \cite{efm32-energy-op} shows that EM4 takes a longer time to use less power. This means that it's ideal for when the microcontroller should stay idle for a long time. In this case it would use less power to be on EM2 than on EM4.
+
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{assets/img/em4.png}
+    \caption{The power usage for EM4 against EM2 on the Giant Gecko and Leopard Gecko}
+    \label{fig:em4}
+    \end{center}
+\end{figure}
