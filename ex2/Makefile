@@ -27,3 +27,6 @@ upload :
 .PHONY : clean
 clean :
 	-rm -rf *.o *.elf *.bin *.hex 
+
+.PHONY: reload
+reload: ex2.bin upload
