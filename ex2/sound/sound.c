@@ -6,31 +6,31 @@
 #include "generate_wav.c"
 
 #define S_RATE (44100)
-#define BUF_SIZE (S_RATE*2)
+#define BUF_SIZE (S_RATE/2)
 
 int buffer[BUF_SIZE];
 
-uint8_t int_sin(int n) {
+int int_sin(int n) {
     n = n % 256;
-    return sine_wave[n];
+    return (sine_wave[n]*2)-256;
 }
-uint8_t int_square(int n) {
+int int_square(int n) {
     n = n % 256;
     if (n < 128) {
-        return 0;
+        return -256;
     }
-    return 0xff;
+    return 256;
 }
-uint8_t int_sawtooth(int n) {
-    return n % 256;
+int int_sawtooth(int n) {
+    return (n % 256) * 2 - 256;
 }
-uint8_t int_whitenoise() {
-    return rand() % 256;
+int int_whitenoise() {
+    return rand() % 512 - 256;
 }
 
 int main() {
-    int volume = 125;
-    int freq_hz = 440;
+    int volume = 100;
+    int freq_hz = 2000;
     float phase = 0;
 
     /* ADSR
@@ -39,17 +39,17 @@ int main() {
      * a, d and r should be set in number of buffer frames
      * s is between 0 and 256, and represents the sustain level (volume)
      */
-    int a = 10000;
-    int d = 10000;
-    int s = 150;
-    int r = 2000;
+    int a = 0;
+    int d = 2050;
+    int s = 128;
+    int r = 20000;
 
     int envelope[BUF_SIZE];
     for (int i=0; i < BUF_SIZE; i++) {
-        if (i <= a) {
-            envelope[i] = 256 * i / a;
+        if (i < a) {
+            envelope[i] = 255 * i / a;
         } else if (i <= (a+d)) {
-            envelope[i] = 256 - (256-s)*(i-a)/d;
+            envelope[i] = 255 - (255-s)*(i-a)/d;
         } else if (i < BUF_SIZE - r) {
             envelope[i] = s;
         } else {
@@ -62,7 +62,7 @@ int main() {
     for (int i=0; i < BUF_SIZE; i++) {
         phase += freq_radians_per_sample;
         int amplitude = envelope[i] * volume / 256;
-        buffer[i] = (int) (amplitude * int_sawtooth(phase));
+        buffer[i] = (int) (amplitude * int_square(phase));
     }
 
     write_wav("test.wav", BUF_SIZE, buffer, S_RATE);
