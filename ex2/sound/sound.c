@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <math.h>
 #include "sine.c"
 #include "generate_wav.c"
@@ -13,6 +14,19 @@ uint8_t int_sin(int n) {
     n = n % 256;
     return sine_wave[n];
 }
+uint8_t int_square(int n) {
+    n = n % 256;
+    if (n < 128) {
+        return 0;
+    }
+    return 0xff;
+}
+uint8_t int_sawtooth(int n) {
+    return n % 256;
+}
+uint8_t int_whitenoise() {
+    return rand() % 256;
+}
 
 int main() {
     int volume = 125;
@@ -25,9 +39,9 @@ int main() {
      * a, d and r should be set in number of buffer frames
      * s is between 0 and 256, and represents the sustain level (volume)
      */
-    int a = 1;
+    int a = 10000;
     int d = 10000;
-    int s = 2;
+    int s = 150;
     int r = 2000;
 
     int envelope[BUF_SIZE];
@@ -48,7 +62,7 @@ int main() {
     for (int i=0; i < BUF_SIZE; i++) {
         phase += freq_radians_per_sample;
         int amplitude = envelope[i] * volume / 256;
-        buffer[i] = (int) (amplitude * int_sin(phase));
+        buffer[i] = (int) (amplitude * int_sawtooth(phase));
     }
 
     write_wav("test.wav", BUF_SIZE, buffer, S_RATE);
