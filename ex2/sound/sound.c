@@ -8,6 +8,9 @@
 #define S_RATE (44100)
 #define BUF_SIZE (S_RATE/2)
 
+void generate_blip(char *filename);
+void generate_sound(int freq_hz, int a, int d, int s, int r, char *filename);
+
 int buffer[BUF_SIZE];
 
 int int_sin(int n) {
@@ -29,8 +32,26 @@ int int_whitenoise() {
 }
 
 int main() {
+    generate_blip("test1.wav");
+    generate_blip("test2.wav");
+    generate_blip("test3.wav");
+    generate_blip("test4.wav");
+
+    return 0;
+}
+
+void generate_blip(char *filename) {
+    int frequency = rand() % 1500 + 1500;
+    int a = 0;
+    int d = rand() % 4000;
+    int s = rand() % 100 + 60;
+    int r = rand() % 14000 + 4000;
+    generate_sound(frequency, a, d, s, r, filename);
+}
+
+
+void generate_sound(int freq_hz, int a, int d, int s, int r, char *filename) {
     int volume = 100;
-    int freq_hz = 2000;
     float phase = 0;
 
     /* ADSR
@@ -39,11 +60,6 @@ int main() {
      * a, d and r should be set in number of buffer frames
      * s is between 0 and 256, and represents the sustain level (volume)
      */
-    int a = 0;
-    int d = 2050;
-    int s = 128;
-    int r = 20000;
-
     int envelope[BUF_SIZE];
     for (int i=0; i < BUF_SIZE; i++) {
         if (i < a) {
@@ -60,12 +76,14 @@ int main() {
     float freq_radians_per_sample = freq_hz * 256.0 / S_RATE;
 
     for (int i=0; i < BUF_SIZE; i++) {
+        if (i%1000==0) {
+            freq_hz -= 1;
+            freq_radians_per_sample = freq_hz * 256.0 / S_RATE;
+        }
         phase += freq_radians_per_sample;
         int amplitude = envelope[i] * volume / 256;
         buffer[i] = (int) (amplitude * int_square(phase));
     }
 
-    write_wav("test.wav", BUF_SIZE, buffer, S_RATE);
-
-    return 0;
+    write_wav(filename, BUF_SIZE, buffer, S_RATE);
 }
