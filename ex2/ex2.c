@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 #include "efm32gg.h"
+//#include "sound/blip.c"
 
 #define   SAMPLE_PERIOD   317
 
@@ -12,6 +13,8 @@ void setupDAC();
 void disableDAC();
 void setupNVIC();
 void setupGPIO();
+void generate_blip();
+void generate_laser();
 
 int main(void) 
 {  
@@ -21,7 +24,7 @@ int main(void)
   
   setupNVIC();
 
-  //generate_sound();
+  generate_laser();
 
   __asm__("wfi");
 

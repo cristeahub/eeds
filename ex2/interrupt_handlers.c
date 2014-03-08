@@ -4,6 +4,12 @@
 #include "efm32gg.h"
 
 void play_tone();
+void stopTimer();
+void startTimer();
+void setupDAC();
+void disableDAC();
+void generate_blip();
+void generate_laser();
 
 void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
 {  
@@ -25,6 +31,7 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
     *GPIO_IFC = 0xff;
     *GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
 
+    generate_laser();
     startTimer();
     setupDAC();
 }

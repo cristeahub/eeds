@@ -1,38 +1,35 @@
 #include <stdint.h>
-#include <stdlib.h>
-#include "sine.c"
+#include "../rand.c"
 
 #define S_RATE (44100)
 #define BUF_SIZE (S_RATE/2)
 
+extern int i;
 typedef struct Sound {
     int freq;
     int a;
     int d;
     int s;
     int r;
+    int slide;
+    int (*wave)(int);
 } Sound;
 
 void generate_blip();
-void generate_sound(int freq_hz, int a, int d, int s, int r);
 int sound_sample(Sound sound, int i);
 
-int int_sin(int n) {
-    n = n % 256;
-    return (sine_wave[n]*2)-256;
-}
 int int_square(int n) {
     n = n % 256;
     if (n < 128) {
-        return -256;
+        return 0;
     }
-    return 256;
+    return 1;
 }
 int int_sawtooth(int n) {
-    return (n % 256) * 2 - 256;
+    return (n % 256);
 }
-int int_whitenoise() {
-    return rand() % 512 - 256;
+int int_whitenoise(int n) {
+    return rand() % 2;
 }
 
 Sound current_sound;
@@ -43,18 +40,28 @@ void generate_blip() {
     int d = rand() % 3500;
     int s = rand() % 100 + 60;
     int r = rand() % 14000 + 4000;
-    //generate_sound(frequency, a, d, s, r);
-    current_sound = (Sound){frequency, a, d, s, r};
+    int slide = 0;
+    current_sound = (Sound){frequency, a, d, s, r, slide, int_square};
+    i = 0;
+}
+
+void generate_laser() {
+    int frequency = rand() % 1500 + 500;
+    int a = 0;
+    int d = rand() % 2000 + 1000;
+    int s = rand() % 100;
+    int r = rand() % 16000 + 500;
+    int slide = 2;
+    current_sound = (Sound){frequency, a, d, s, r, slide, int_square};
+    i = 0;
 }
 
 int sound_sample(Sound sound, int i) {
-    int volume = 100;
-    float phase = 0;
 
-    int envelope;
+    int envelope = 255;
     if (i < sound.a) {
         envelope = 255 * i / sound.a;
-    } else if (i <= (sound.a+sound.d)) {
+    } else if (i < (sound.a+sound.d)) {
         envelope = 255 - (255-sound.s)*(i-sound.a)/sound.d;
     } else if (i < BUF_SIZE - sound.r) {
         envelope = sound.s;
@@ -62,47 +69,12 @@ int sound_sample(Sound sound, int i) {
         envelope = sound.s*(BUF_SIZE-i)/sound.r;
     }
 
-    float freq_radians_per_sample = sound.freq* 256.0 / S_RATE;
+    int slide = 0;
+    if (sound.slide != 0) slide = i/sound.slide;
+    int freq = sound.freq - slide;
+    int freq_radians_per_sample = freq * 256 / S_RATE;
 
-    if (i%50==0) {
-        sound.freq -= 1;
-        freq_radians_per_sample = sound.freq * 256.0 / S_RATE;
-    }
-    phase += freq_radians_per_sample;
-    int amplitude = envelope * volume / 256;
-    return (int) (amplitude * int_square(phase));
+    int phase = (i+1) * freq_radians_per_sample;
+    //float amplitude = envelope / 256.0;
+    return (int) (envelope * sound.wave(phase));
 }
-
-
-/*
-void generate_sound(int freq_hz, int a, int d, int s, int r) {
-    int volume = 100;
-    float phase = 0;
-
-    int *envelope = malloc(sizeof(int) * BUF_SIZE);
-    for (int i=0; i < BUF_SIZE; i++) {
-        if (i < a) {
-            envelope[i] = 255 * i / a;
-        } else if (i <= (a+d)) {
-            envelope[i] = 255 - (255-s)*(i-a)/d;
-        } else if (i < BUF_SIZE - r) {
-            envelope[i] = s;
-        } else {
-            envelope[i] = s*(BUF_SIZE-i)/r;
-        }
-    }
-
-    float freq_radians_per_sample = freq_hz * 256.0 / S_RATE;
-
-    for (int i=0; i < BUF_SIZE; i++) {
-        if (i%50==0) {
-            freq_hz -= 1;
-            freq_radians_per_sample = freq_hz * 256.0 / S_RATE;
-        }
-        phase += freq_radians_per_sample;
-        int amplitude = envelope[i] * volume / 256;
-        buffer[i] = (int) (amplitude * int_square(phase));
-    }
-    free(envelope);
-}
-*/
