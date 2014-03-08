@@ -5,10 +5,17 @@
 #define S_RATE (44100)
 #define BUF_SIZE (S_RATE/2)
 
+typedef struct Sound {
+    int freq;
+    int a;
+    int d;
+    int s;
+    int r;
+} Sound;
+
 void generate_blip();
 void generate_sound(int freq_hz, int a, int d, int s, int r);
-
-int buffer[BUF_SIZE];
+int sound_sample(Sound sound, int i);
 
 int int_sin(int n) {
     n = n % 256;
@@ -28,26 +35,50 @@ int int_whitenoise() {
     return rand() % 512 - 256;
 }
 
+Sound current_sound;
+
 void generate_blip() {
     int frequency = rand() % 1500 + 1500;
     int a = 0;
     int d = rand() % 3500;
     int s = rand() % 100 + 60;
     int r = rand() % 14000 + 4000;
-    generate_sound(frequency, a, d, s, r);
+    //generate_sound(frequency, a, d, s, r);
+    current_sound = (Sound){frequency, a, d, s, r};
+}
+
+int sound_sample(Sound sound, int i) {
+    int volume = 100;
+    float phase = 0;
+
+    int envelope;
+    if (i < sound.a) {
+        envelope = 255 * i / sound.a;
+    } else if (i <= (sound.a+sound.d)) {
+        envelope = 255 - (255-sound.s)*(i-sound.a)/sound.d;
+    } else if (i < BUF_SIZE - sound.r) {
+        envelope = sound.s;
+    } else {
+        envelope = sound.s*(BUF_SIZE-i)/sound.r;
+    }
+
+    float freq_radians_per_sample = sound.freq* 256.0 / S_RATE;
+
+    if (i%50==0) {
+        sound.freq -= 1;
+        freq_radians_per_sample = sound.freq * 256.0 / S_RATE;
+    }
+    phase += freq_radians_per_sample;
+    int amplitude = envelope * volume / 256;
+    return (int) (amplitude * int_square(phase));
 }
 
 
+/*
 void generate_sound(int freq_hz, int a, int d, int s, int r) {
     int volume = 100;
     float phase = 0;
 
-    /* ADSR
-     *
-     * Tweak the numbers:
-     * a, d and r should be set in number of buffer frames
-     * s is between 0 and 256, and represents the sustain level (volume)
-     */
     int *envelope = malloc(sizeof(int) * BUF_SIZE);
     for (int i=0; i < BUF_SIZE; i++) {
         if (i < a) {
@@ -74,3 +105,4 @@ void generate_sound(int freq_hz, int a, int d, int s, int r) {
     }
     free(envelope);
 }
+*/
