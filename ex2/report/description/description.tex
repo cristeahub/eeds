@@ -40,3 +40,8 @@ The start up melody can be found here. \cite{song}
 Buttons are set up to control one sound effect each. The remaining buttons will stop the sound currently playing.
 When a GPIO interrupt is triggered, we check whether any buttons are being pressed down.
 The first button which is currently being pressed will have its designated action executed.
+
+\subsection{Energy consumption}
+
+A great deal of work was put into ensuring the program remained energy efficient despite the amount of sound manipulation.
+To achieve this, we made sure the board dives straight into deep sleep after each sound is finished playing.

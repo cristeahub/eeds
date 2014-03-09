@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "proto.h"
 #include "efm32gg.h"
 
 /* function to set up GPIO mode and interrupts*/
@@ -23,7 +24,5 @@ void setupGPIO()
   *GPIO_EXTIFALL = 0xff;
   *GPIO_EXTIRISE = 0xff;
   *GPIO_IEN = 0xff;
+  *GPIO_IFC = 0xff;
 }
-
-
-

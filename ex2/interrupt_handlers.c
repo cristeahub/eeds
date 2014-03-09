@@ -2,19 +2,10 @@
 #include <stdbool.h>
 
 #include "efm32gg.h"
-
-void play_tone();
-void play_song();
-void stopTimer();
-void startTimer();
-void setupDAC();
-void disableDAC();
-void generate_blip();
-void generate_laser();
-void generate_blurp();
-void button_handler();
+#include "proto.h"
 
 int mode = -1;
+extern int i;
 
 void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
 {  
@@ -27,20 +18,17 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler() 
 {
-    *GPIO_IFC = 0xff;
-
     button_handler();
 }
 
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler() 
 {
-    *GPIO_IFC = 0xff;
-
     button_handler();
 }
 
 void button_handler() {
     *GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+    *GPIO_IFC = 0xff;
 
     int current_button = -1;
     int input = ~(*GPIO_PC_DIN);
@@ -54,30 +42,27 @@ void button_handler() {
         case 0:
             mode = 0;
             generate_blip();
-            startTimer();
-            setupDAC();
+            setup_song();
             break;
         case 1:
             mode = 0;
             generate_laser();
-            startTimer();
-            setupDAC();
+            setup_song();
             break;
         case 2:
             mode = 0;
             generate_blurp();
-            startTimer();
-            setupDAC();
+            setup_song();
             break;
         case 3:
             mode = 1;
-            startTimer();
-            setupDAC();
+            setup_song();
             break;
         default:
-            if (current_button != -1) {
-                stopTimer();
-                disableDAC();
+            if(current_button != -1) {
+                mode = 0;
+                generate_alert();
+                setup_song();
             }
             break;
     }
