@@ -15,7 +15,7 @@ A timer was needed to be able to continuously write sound samples to the DAC.
 
 \subsection{Timer}
 
-The timer clock frequency is 14MHz, but for the music we only want a freqency of 44100KHz.
+The timer clock frequency is 14MHz, but for the music we only want a frequency of 44100Hz.
 Therefore we set the sample period to $ \frac{\SI{14}{\mega\hertz}}{\SI{44100}{\hertz}} \approx 317 $.
 This will ensure the timer interrupt is triggered 44100 times a second.
 
