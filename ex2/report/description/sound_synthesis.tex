@@ -1,0 +1,59 @@
+\subsection{Sound synthesis}
+The three sound effects we've implemented are all generated in real-time on the board.
+We made three different sound effects: a coin blip, a laser, and a level-up sound.
+They are all based on a simple waveform, either a square wave or a sawtooth.
+Each sound has parameters that are allowed to change for each playback.
+Those parameters include frequency, slide, and ADSR parameters.
+To leverage the fact that the sound samples are generated on-the-fly, we added a bit of randomization to the ADSR parameters.
+This made each playback of a sound effect unique, so each time you press the button for a given sound effect it will sound slightly different.
+In addition to varying the ADSR parameters, the frequency was randomized within a given interval for each of the sound effects.
+We also added a custom slide to each of them – this allowed the frequency to change gradually during the sound.
+
+\subsubsection{ADSR}
+
+A waveform with constant frequency alone would not provide the sound effects we wanted. We therefore implemented a ADSR envelope \cite{adsr}.
+The envelope consists of an attack period, a decay period, a sustain level and a release period, as seen in figure \ref{fig:adsr_envelope}.
+
+\begin{itemize}
+    \item The attack periode is the time to use from zero to maximum amplitude.
+    \item The decay is the time from max amplitude down to the sustain level.
+    \item The sustain level is the amplitude to rest on between the decay and release periods.
+    \item The release indicates how much time to spend fading from the sustain level to zero volume.
+\end{itemize}
+
+\begin{figure}[ht!]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{assets/img/adsr.png}
+    \caption{A ADSR envelope}
+    \label{fig:adsr_envelope}
+    \end{center}
+\end{figure}
+
+\subsubsection{Effects}
+
+The parameter intervals for the three implemented sound effects can be seen in Table \ref{tab:sound_effects}.
+
+\begin{table}[ht!]
+    \begin{center}
+    \begin{tabular}{r|lll}
+    Parameter           & Coin       & Laser             & Level-up   \\
+    \hline
+    Waveform            & Square     & Square / Sawtooth & Sawtooth   \\
+    Frequency (initial) & 1500-3000  & 1200-3200         & 100-1100   \\
+    Slide               & 0          & -2                & 6          \\
+    Attack              & 0          & 0                 & 0-500      \\
+    Decay               & 0-3500     & 1000-3000         & 1000-3000  \\
+    Sustain level       & 30-80      & 0-50              & 50-100     \\
+    Release             & 4000-18000 & 4500-10500        & 2500-16500 \\
+    \end{tabular}
+    \end{center}
+    \caption{Parameter intervals for the implemented sound effects}
+    \label{tab:sound_effects}
+\end{table}
+
+All sound effect calculations are done with integers, to ensure that the calculations are fast enough to be processed within one timer interval.
+
+
+\subsubsection{Custom random function}
+
+There was no rand() function available, so we made one ourselves.
