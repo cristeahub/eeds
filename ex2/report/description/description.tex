@@ -10,32 +10,12 @@ The next step was to make interrupts work. A main function was constructed to se
 
 The assignment involves a lot of GPIO usage, and therefore some values are used over and over. The register design is set up so that three registers are storing GPIO constants and one register is used for simulating a wait for the opening sequence. They each have an alias to be easier to access. GPIO\_PA\_BASE was renamed gpio\_o and GPIO\_PC\_BASE was renamed to gpio\_i, GPIO\_BASE was renamed gpio. The remaining registers from r0 to r7 is used for variable content. See table \ref{tab:register_design} in appendix A on page \pageref{tab:register_design} for an overview of the registers.
 
-\subsection{Sound synthesis}
-The three sound effects we've implemented are all generated in real-time on the board.
-We made three different sound effects: a coin blip, a laser, and a level-up sound.
-They are all based on a simple waveform, either a square wave or a sawtooth.
-Each sound has parameters that are allowed to change for each playback.
-Those parameters include frequency, slide, and ADSR parameters.
+\subsection{Setting up the DAC}
 
-\subsubsection{ADSR}
+To get sound playing on the board, we had to use the DAC, a Digital-to-Analog Converter.
+A timer was needed to be able to continuosly write sound samples to the DAC.
 
-A waveform with constant frequency alone would not provide the sound effects we wanted. We therefore implemented a ADSR envelope \cite{adsr}.
-The envelope consists of an attack period, a decay period, a sustain level and a release period, as seen in figure \ref{fig:adsr}.
-
-\begin{itemize}
-    \item The attack periode is the time to use from zero to maximum amplitude.
-    \item The decay is the time from max amplitude down to the sustain level.
-    \item The sustain level is the amplitude to rest on between the decay and release periods.
-    \item The release indicates how much time to spend fading from the sustain level to zero volume.
-\end{itemize}
-
-\begin{figure}[ht!]
-    \begin{center}
-    \includegraphics[width=0.8\textwidth]{assets/img/adsr.png}
-    \caption{A ADSR envelope}
-    \label{fig:adsr_envelope}
-    \end{center}
-\end{figure}
+\input{description/sound_synthesis.tex}
 
 \subsection{Pre-recorded melody}
 
@@ -43,3 +23,4 @@ The envelope consists of an attack period, a decay period, a sustain level and a
 
 \subsection{Button control}
 
+Buttons are set up to control one sound effect each. The remaining buttons will stop the sound currently playing.
