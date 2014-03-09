@@ -31,21 +31,27 @@ The envelope consists of an attack period, a decay period, a sustain level and a
 
 \subsubsection{Effects}
 
+The parameter intervals for the three implemented sound effects can be seen in Table \ref{tab:sound_effects}.
+
 \begin{table}[ht!]
     \begin{center}
     \begin{tabular}{r|lll}
-    Parameter           & Coin       & Laser           & Level-up   \\
+    Parameter           & Coin       & Laser             & Level-up   \\
     \hline
-    Frequency (initial) & 1500-3000  & 1200-3200       & 100-1100   \\
-    Slide               & 0          & -2              & 6          \\
-    Attack              & 0          & 0               & 0-500      \\
-    Decay               & 0-3500     & 1000-3000       & 1000-3000  \\
-    Sustain level       & 30-80      & 0-50            & 50-100     \\
-    Release             & 4000-18000 & 4500-10500      & 2500-16500 \\
-    Waveform            & square     & square/sawtooth & sawtooth   \\
+    Waveform            & Square     & Square / Sawtooth & Sawtooth   \\
+    Frequency (initial) & 1500-3000  & 1200-3200         & 100-1100   \\
+    Slide               & 0          & -2                & 6          \\
+    Attack              & 0          & 0                 & 0-500      \\
+    Decay               & 0-3500     & 1000-3000         & 1000-3000  \\
+    Sustain level       & 30-80      & 0-50              & 50-100     \\
+    Release             & 4000-18000 & 4500-10500        & 2500-16500 \\
     \end{tabular}
     \end{center}
+    \caption{Parameter intervals for the implemented sound effects}
+    \label{tab:sound_effects}
 \end{table}
+
+All sound effect calculations are done with integers, to ensure that the calculations are fast enough to be processed within one timer interval.
 
 
 \subsubsection{Custom random function}
