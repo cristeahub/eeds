@@ -12,6 +12,7 @@ void disableDAC();
 void generate_blip();
 void generate_laser();
 void generate_blurp();
+void generate_alert();
 void button_handler();
 void setupTimer();
 void disableTimer();

@@ -5,6 +5,7 @@
 #include "proto.h"
 
 int mode = -1;
+extern int i;
 
 void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
 {  
@@ -59,8 +60,9 @@ void button_handler() {
             break;
         default:
             if(current_button != -1) {
-                mode = -1;
-                stop_song();
+                mode = 0;
+                generate_alert();
+                setup_song();
             }
             break;
     }

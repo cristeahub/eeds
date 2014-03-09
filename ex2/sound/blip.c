@@ -70,7 +70,18 @@ void generate_blurp() {
     int d = rand() % 2000 + 1000;
     int s = rand() % 50 + 50;
     int r = rand() % 14000 + 2500;
-    int slide = -6;
+    int slide = - ( rand() % 3 + 3);
+    current_sound = (Sound){frequency, a, d, s, r, slide, int_sawtooth};
+    i = 0;
+}
+
+void generate_alert() {
+    int frequency = rand() % 80 + 175;
+    int a = 0;
+    int d = rand() % 1000 + 500;
+    int s = rand() % 50 + 50;
+    int r = rand() % 14000 + 2500;
+    int slide = 0;
     current_sound = (Sound){frequency, a, d, s, r, slide, int_sawtooth};
     i = 0;
 }

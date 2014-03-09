@@ -9,7 +9,9 @@ int main(void)
   setupGPIO();
   setupNVIC();
   setSleep(0b110);
+
   __asm__("wfi");
+
   return 0;
 }
 
