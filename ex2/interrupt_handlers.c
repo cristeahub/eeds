@@ -3,29 +3,82 @@
 
 #include "efm32gg.h"
 
-/* TIMER1 interrupt handler */
+void play_tone();
+void play_song();
+void stopTimer();
+void startTimer();
+void setupDAC();
+void disableDAC();
+void generate_blip();
+void generate_laser();
+void generate_blurp();
+void button_handler();
+
+int mode = -1;
+
 void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
 {  
-  /*
-    TODO feed new samples to the DAC
-    remember to clear the pending interrupt by writing 1 to TIMER1_IFC
-  */  
-
-    *DAC0_CH0DATA = 0xf0f;
+    *TIMER1_IFC = 1;
+    if (mode == 0)
+        play_tone();
+    if (mode == 1)
+        play_song();
 }
 
-/* GPIO even pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler() 
 {
-    /* TODO handle button pressed event, remember to clear pending interrupt */
     *GPIO_IFC = 0xff;
-    *GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+
+    button_handler();
 }
 
-/* GPIO odd pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler() 
 {
-    /* TODO handle button pressed event, remember to clear pending interrupt */
     *GPIO_IFC = 0xff;
+
+    button_handler();
+}
+
+void button_handler() {
     *GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+
+    int current_button = -1;
+    int input = ~(*GPIO_PC_DIN);
+    for (int i=0; i < 8; i++) {
+        if ((1 << i) == (input & (1 << i))) {
+            current_button = i;
+            break;
+        }
+    }
+    switch (current_button) {
+        case 0:
+            mode = 0;
+            generate_blip();
+            startTimer();
+            setupDAC();
+            break;
+        case 1:
+            mode = 0;
+            generate_laser();
+            startTimer();
+            setupDAC();
+            break;
+        case 2:
+            mode = 0;
+            generate_blurp();
+            startTimer();
+            setupDAC();
+            break;
+        case 3:
+            mode = 1;
+            startTimer();
+            setupDAC();
+            break;
+        default:
+            if (current_button != -1) {
+                stopTimer();
+                disableDAC();
+            }
+            break;
+    }
 }

@@ -41,6 +41,7 @@ EXTERN(__cs3_start_c main __cs3_stack __cs3_heap_end)
 
 /* Provide fall-back values */
 PROVIDE(__cs3_heap_start = _end);
+PROVIDE(__cs3_heap_limit = __cs3_heap_start);
 PROVIDE(__cs3_heap_end = __cs3_region_start_ram + __cs3_region_size_ram);
 PROVIDE(__cs3_region_num = (__cs3_regions_end - __cs3_regions) / 20);
 PROVIDE(__cs3_stack = __cs3_region_start_ram + __cs3_region_size_ram);
