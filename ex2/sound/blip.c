@@ -15,7 +15,6 @@ typedef struct Sound {
     int (*wave)(int);
 } Sound;
 
-void generate_blip();
 int sound_sample(Sound sound, int i);
 
 int int_square(int n) {
@@ -23,13 +22,20 @@ int int_square(int n) {
     if (n < 128) {
         return 0;
     }
-    return 1;
+    return 2;
 }
 int int_sawtooth(int n) {
-    return (n % 256);
+    n = n % 256;
+    if (n < 84) {
+        return 0;
+    }
+    if (n < 168) {
+        return 1;
+    }
+    return 2;
 }
 int int_whitenoise(int n) {
-    return rand() % 2;
+    return rand() % 3;
 }
 
 Sound current_sound;
@@ -38,7 +44,7 @@ void generate_blip() {
     int frequency = rand() % 1500 + 1500;
     int a = 0;
     int d = rand() % 3500;
-    int s = rand() % 100 + 60;
+    int s = rand() % 50 + 30;
     int r = rand() % 14000 + 4000;
     int slide = 0;
     current_sound = (Sound){frequency, a, d, s, r, slide, int_square};
@@ -46,23 +52,36 @@ void generate_blip() {
 }
 
 void generate_laser() {
-    int frequency = rand() % 1500 + 500;
+    int frequency = rand() % 2000 + 1200;
     int a = 0;
     int d = rand() % 2000 + 1000;
-    int s = rand() % 100;
-    int r = rand() % 16000 + 500;
+    int s = rand() % 50;
+    int r = rand() % 6000 + 4500;
     int slide = 2;
-    current_sound = (Sound){frequency, a, d, s, r, slide, int_square};
+    int func_i = rand() % 2;
+    int (*wave)(int) = (func_i) ? int_square : int_sawtooth;
+    current_sound = (Sound){frequency, a, d, s, r, slide, wave};
+    i = 0;
+}
+
+void generate_blurp() {
+    int frequency = rand() % 1000 + 100;
+    int a = rand() % 500;
+    int d = rand() % 2000 + 1000;
+    int s = rand() % 50 + 50;
+    int r = rand() % 14000 + 2500;
+    int slide = -6;
+    current_sound = (Sound){frequency, a, d, s, r, slide, int_sawtooth};
     i = 0;
 }
 
 int sound_sample(Sound sound, int i) {
 
-    int envelope = 255;
+    int envelope;
     if (i < sound.a) {
-        envelope = 255 * i / sound.a;
+        envelope = 127 * i / sound.a;
     } else if (i < (sound.a+sound.d)) {
-        envelope = 255 - (255-sound.s)*(i-sound.a)/sound.d;
+        envelope = 127 - (127-sound.s)*(i-sound.a)/sound.d;
     } else if (i < BUF_SIZE - sound.r) {
         envelope = sound.s;
     } else {
