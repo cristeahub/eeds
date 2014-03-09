@@ -1,2 +1,8 @@
 \section{Results and Tests}
 
+\subsection{Energy consumption}
+
+As long as no music is being played, the energy consumption is low.
+It spikes upon button presses, when music is being played.
+
+There are two types of sound playback. Either the prerendered wav-file, or the on-the-fly generated sound effects. The difference in energy consumption between these two tasks is minimal, even though the wav playback only requires two array lookups, while the sound effects involve multiple math operations.
