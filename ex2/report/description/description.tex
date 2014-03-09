@@ -13,6 +13,11 @@ In addition we set up a timer, which was to be used for interacting with the DAC
 To get sound playing on the board, we had to use the DAC, a Digital-to-Analog Converter.
 A timer was needed to be able to continuously write sound samples to the DAC.
 
+\subsection{Timer}
+
+The timer clock frequency is 14MHz, but for the music we only want a freqency of 44100KHz.
+Therefore we set the sample period to $ \frac{\SI{14}{\mega\hertz}}{\SI{44100}{\kilo\hertz}} \approx 317 $.
+
 \input{description/sound_synthesis.tex}
 
 \subsection{Pre-recorded melody}
