@@ -16,63 +16,23 @@ A timer was needed to be able to continuously write sound samples to the DAC.
 \subsection{Timer}
 
 The timer clock frequency is 14MHz, but for the music we only want a freqency of 44100KHz.
-Therefore we set the sample period to $ \frac{\SI{14}{\mega\hertz}}{\SI{44100}{\kilo\hertz}} \approx 317 $.
+Therefore we set the sample period to $ \frac{\SI{14}{\mega\hertz}}{\SI{44100}{\hertz}} \approx 317 $.
 This will ensure the timer interrupt is triggered 44100 times a second.
 
 \input{description/sound_synthesis.tex}
 
 \subsection{Pre-recorded melody}
 
-For the start-up melody, we chose to produce a song using FL Studio, a digital audio workstation. We would then export the .wav file and convert it to a C array, as a wav file consists of two channels of typically 44,100 samples per second, and $2^x$ bits per sample. Doing this, we could . We had to first export the song to a 16 bit int .wav file, as FL Studio didn't accept 8 bit int .wav. We opened the song in Audacity, as this audio editor allowed us to export it to a 8 bit int .wav file. Moreover, we used a Python library to convert the .wav samples to a C array, tailoring this general Python .wav interpreter code \cite{wav} to fit our needs. Our edited Python code to produce the C file that holds the two arrays that represents the two channels is shown below:
-\\[1cm]
-\begin{code}
-import wave, struct
+For the start-up melody, we chose to produce a song using FL Studio, a digital audio workstation.
+We would then export the .wav file and convert it to a C array, as a wav file consists of two channels of typically 44,100 samples per second, and 8 bits per sample.
+We had to first export the song to a 16-bit int .wav file, as FL Studio didn't accept 8-bit uint .wavformat.
+We opened the song in Audacity, as this audio editor allowed us to export it to a 8 bit int .wav file.
+Moreover, we used a Python library to convert the .wav samples to a C array, tailoring this general Python .wav interpreter code \cite{wav} to fit our needs. Our edited Python code to produce the C file that holds the two arrays that represents the two channels is shown in figure \ref{fig:python} in appendix A.
 
-def pcm_channels(wave_file):
-    stream = wave.open(wave_file,"rb")
+The sound clip we made originally lasted around 15 seconds, which results in $\SI{44100}{Hz} * 15 \text{seconds} = 661500 \text{samples}$.
+Since this file was too large for the DAC, we shortened the song to 8 seconds.
+This wav-file amounted to 704 kB of space, which became 3.5 MB when converted to two arrays in C. This proved to be small enough for the DAC to interpret.
 
-    num_channels = stream.getnchannels()
-    sample_rate = stream.getframerate()
-    sample_width = stream.getsampwidth()
-    num_frames = stream.getnframes()
-
-    raw_data = stream.readframes( num_frames )
-    stream.close()
-
-    total_samples = num_frames * num_channels
-
-    if sample_width == 1: 
-        fmt = "%iB" % total_samples
-    elif sample_width == 2:
-        fmt = "%ih" % total_samples
-    else:
-        raise ValueError("Only supports 8 and 16 bit audio formats.")
-
-    integer_data = struct.unpack(fmt, raw_data)
-    del raw_data
-
-    channels = [ [] for time in range(num_channels) ]
-
-    for index, value in enumerate(integer_data):
-        bucket = index % num_channels
-        channels[bucket].append(value)
-
-    return channels
-
-f = open('song.c', 'w')
-
-chan0, chan1 = pcm_channels('file.wav')[0], pcm_channels('file.wav')[1]
-
-#Outputs the C code with the two arrays
-f.write('#include <stdint.h>\n\nconst uint8_t channel0[] = {' + str(chan0)[1:-1]\
- + '};\n\nconst uint8_t channel1[] = {' + str(chan1)[1:-1] + '};')
-
-\end{code}
-
-\newpage
-
-The sound clip lasted around 15 seconds, which results in $44100 samples/seconds * 15 seconds = 661500 samples$. 
-Since this file was too large for the DAC, we shortened the song to 8 seconds, or 3.5 MB, which was small enough for the DAC to interpret.
 The start up melody can be found here. \cite{song}
 
 \subsection{Button control}
