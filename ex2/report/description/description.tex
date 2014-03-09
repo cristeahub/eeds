@@ -24,7 +24,7 @@ This will ensure the timer interrupt is triggered 44100 times a second.
 \subsection{Pre-recorded melody}
 
 For the start-up melody, we chose to produce a song using FL Studio, a digital audio workstation. We would then export the .wav file and convert it to a C array, as a wav file consists of two channels of typically 44,100 samples per second, and $2^x$ bits per sample. Doing this, we could . We had to first export the song to a 16 bit int .wav file, as FL Studio didn't accept 8 bit int .wav. We opened the song in Audacity, as this audio editor allowed us to export it to a 8 bit int .wav file. Moreover, we used a Python library to convert the .wav samples to a C array, tailoring this general Python .wav interpreter code \cite{wav} to fit our needs. Our edited Python code to produce the C file that holds the two arrays that represents the two channels is shown below:
-
+\\[1cm]
 \begin{code}
 import wave, struct
 
@@ -73,7 +73,7 @@ f.write('#include <stdint.h>\n\nconst uint8_t channel0[] = {' + str(chan0)[1:-1]
 
 The sound clip lasted around 15 seconds, which results in $44100 samples/seconds * 15 seconds = 661500 samples$. 
 Since this file was too large for the DAC, we shortened the song to 8 seconds, or 3.5 MB, which was small enough for the DAC to interpret.
-
+The start up melody can be found here. \cite{song}
 
 \subsection{Button control}
 
