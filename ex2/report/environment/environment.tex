@@ -1,8 +1,19 @@
 \section{Development environment}
-We used all of the tools from the previous assignment \cite{report-1}, in addition to some new tools which will be outlined here.
+We used all of the tools from the previous assignment \cite{report-1}, namely \texttt{vim}, \texttt{git}, GitHub, Make and the development stack for EFM32GG.
+
+The same compendium \cite{eeds-compendium} from last exercise was used.
+Accompanying this paper was mostly the EFM32GG Reference Manual \cite{efm32gg-ref-man} and the Energy OptimizationApplication Note \cite{efm32gg-energy-op}.
+Since playing sound is a complex task the manuals became more important as we wanted to optimize our solution as much as possible.
+
+In addition to this, some new tools was used which will be outlined here.
 
 \subsection{C Programming language}
-The C programming language was used in this assignment, and the GNU C Compiler GCC was used for compiling.
-The gcc command was also used for linking C files, like the EFM32GG startup code and useful libraries. By using pointers that point to the I/O registers, we were able to directly control the EFM32GG board. In opposition to assignment 1, we also had to write the interrupt handling in C in this assignment.
+The C programming language was used in this assingment.
+This programming language serves as an abstraction above Assembly while still being close to the hardware.
+By using C for our development the development time was reduced significantly and debugging became much easier.
+Like the previous assignment, our compiled code ran right on the hardware.
+Because of this we had to write the interrput handeling in C.
 
 \subsection{gcc}
+The GNU compiler collection is a compiler used to compile the C code down to bytecode.
+It also serves as a linker for the C files. This means the startup code and other useful libraries can easily be incorporated into this project.
