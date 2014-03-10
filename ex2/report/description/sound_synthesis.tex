@@ -1,6 +1,6 @@
 \subsection{Sound synthesis}
-The three sound effects we've implemented are all generated in real-time on the board.
-We made three different sound effects: a coin blip, a laser, and a level-up sound.
+The sound effects we've implemented are all generated in real-time on the board.
+We made four different sound effects: a coin blip, a lasera level-up sound, and an alert.
 They are all based on a simple waveform, either a square wave or a sawtooth.
 Each sound has parameters that are allowed to change for each playback.
 Those parameters include frequency, slide, and ADSR parameters.
@@ -31,28 +31,48 @@ The envelope consists of an attack period, a decay period, a sustain level and a
 
 \subsubsection{Effects}
 
-The parameter intervals for the three implemented sound effects can be seen in Table \ref{tab:sound_effects}.
+The parameter intervals for the four implemented sound effects can be seen in Table \ref{tab:sound_effects}.
 
 \begin{table}[ht!]
     \begin{center}
-    \begin{tabular}{r|lll}
-    Parameter           & Coin       & Laser             & Level-up   \\
+    \begin{tabular}{r|llll}
+    Parameter         & Coin       & Laser             & Level-up   & Alert      \\
     \hline
-    Waveform            & Square     & Square / Sawtooth & Sawtooth   \\
-    Frequency (initial) & 1500-3000  & 1200-3200         & 100-1100   \\
-    Slide               & 0          & -2                & 6          \\
-    Attack              & 0          & 0                 & 0-500      \\
-    Decay               & 0-3500     & 1000-3000         & 1000-3000  \\
-    Sustain level       & 30-80      & 0-50              & 50-100     \\
-    Release             & 4000-18000 & 4500-10500        & 2500-16500 \\
+    Waveform          & Square     & Square / Sawtooth & Sawtooth   & Sawtooth   \\
+    Initial frequency & 1500-3000  & 1200-3200         & 100-1100   & 175-255    \\
+    Slide             & 0          & -2                & 3-6        & 0          \\
+    Attack            & 0          & 0                 & 0-500      & 0          \\
+    Decay             & 0-3500     & 1000-3000         & 1000-3000  & 500-1500   \\
+    Sustain level     & 30-80      & 0-50              & 50-100     & 50-100     \\
+    Release           & 4000-18000 & 4500-10500        & 2500-16500 & 2500-16500 \\
     \end{tabular}
     \end{center}
     \caption{Parameter intervals for the implemented sound effects}
     \label{tab:sound_effects}
 \end{table}
 
-All sound effect calculations are done with integers, to ensure that the calculations are fast enough to be processed within one timer interval.
 
+\begin{figure}[ht!]
+\begin{code}
+void generate_coin() {
+    current_sound = (Sound){
+        .freq = rand() % 1500 + 1500,
+        .a = 0,
+        .d = rand() % 3500,
+        .s = rand() % 50 + 30,
+        .r = rant() % 14000 + 4000,
+        .slide = 0,
+        .wave = int_square
+    };
+    i = 0;
+}
+\end{code}
+\caption{Code for generating a coin pick sound}
+\label{fig:coin}
+\end{figure}
+
+All sound effect calculations are done with integers, to ensure that the calculations are fast enough to be processed within one timer interval.
+For each effect, there's a function to initalize a struct with the sounds custom parameters. This funtion will be called each time the sound's corresponding button is pressed. An example of this may be seen in Figure \ref{fig:coin}.
 
 \subsubsection{Custom random function}
 
