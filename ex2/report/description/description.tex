@@ -43,5 +43,21 @@ The first button which is currently being pressed will have its designated actio
 
 \subsection{Energy consumption}
 
-A great deal of work was put into ensuring the program remained energy efficient despite the amount of sound manipulation.
-To achieve this, we made sure the board dives straight into deep sleep after each sound is finished playing.
+The desire for this task was to be able to use as little power as possible.
+To achieve this we put a great deal of work into ensuring the program was put in the most energy saving state possible for the current task.
+This means that even though music was played, the card was still in an energy saving mode.
+
+For maximum efficiency the board dives straight into deep sleep after startup.
+One could agrue that a small opening sequence would be useful for the end user, but for this task the startup time could instead be instant.
+Since there are no definitive answer to this we thought we should go for maximum efficiency this time.
+
+Every interaction with the board gives a feedback.
+We made sure that the board goes back to sleep as soon as possible after the given task is done.
+When a song is played the interrupt handler wakes up the board and starts to play the song.
+If a new song is being played while a current song is playing, the current task is thrown away, and the new song starts.
+This technique ensures that no power is wasted on music the end user doesn't want.
+
+When the song is over the card by itself goes back into deep sleep and waits for another interrupt.
+
+The one thing that does use a lot of power is computing generated sounds.
+If one wanted to make a more energy efficient card, one could include more songs for playback, and not generate them live.
