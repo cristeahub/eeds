@@ -53,7 +53,24 @@ The parameter intervals for the three implemented sound effects can be seen in T
 
 All sound effect calculations are done with integers, to ensure that the calculations are fast enough to be processed within one timer interval.
 
+\newpage
 
 \subsubsection{Custom random function}
 
-There was no rand() function available, so we made one ourselves.
+There was no rand() function available, so we made one ourselves:
+\\[0.5cm]
+\begin{code}
+
+static unsigned int next = 1;
+
+int rand_r(unsigned int *seed) {
+    *seed = *seed * 1103515245 + 12345;
+    return (*seed % ((unsigned int)RAND_MAX + 1));
+}
+
+int rand() {
+    return (rand_r(&next));
+}
+
+
+\end{code}
