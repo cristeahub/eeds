@@ -75,8 +75,9 @@ For each effect, there's a function to initalize a struct with the sounds custom
 
 \subsubsection{Custom random function}
 
-There was no rand() function available, so we made one ourselves:
-\\[0.5cm]
+There was no rand() function available, so we made one ourselves.
+
+\begin{figure}[!ht]
 \begin{code}
 
 static unsigned int next = 1;
@@ -90,5 +91,6 @@ int rand() {
     return (rand_r(&next));
 }
 
-
 \end{code}
+\caption{The random function}
+\end{figure}
