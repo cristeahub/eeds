@@ -40,6 +40,7 @@ The start up melody can be found here. \cite{song}
 Buttons are set up to control one sound effect each. The remaining buttons will stop the sound currently playing.
 When a GPIO interrupt is triggered, we check whether any buttons are being pressed down.
 The first button which is currently being pressed will have its designated action executed.
+When one sound is initiated, any currently playing sound is cancelled immediately.
 
 \subsection{Energy consumption}
 
