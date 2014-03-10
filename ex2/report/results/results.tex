@@ -7,7 +7,10 @@ It spikes upon button presses, when music is being played, see figure \ref{fig:s
 
 There are two types of sound playback.
 Either the prerendered wav-file \ref{fig:playback_song}, or the on-the-fly generated sound effects \ref{fig:sounds}.
-The difference in energy consumption between these two tasks is minimal, even though the wav playback only requires two array lookups, while the sound effects involve multiple math operations.
+
+The difference in energy consumption between these two tasks is huge.
+When the sounds are generated, multiple mathematical operations needs to be performed, which uses a lot of power.
+In difference to this, playback is just a lookup in a pregenerated table, and thus uses a lot less power.
 
 The differences can easier be seen in the table below.
 
@@ -24,7 +27,7 @@ The differences can easier be seen in the table below.
         Sound generation    & 5.25 \si{\milli\ampere} \\
         \hline
     \end{tabular}
-    \caption{Average current while idling for different methods of input reading}
+    \caption{Difference in energy usage between states}
     \label{tab:energy_usage}
     \end{center}
 \end{table}
