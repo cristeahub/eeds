@@ -2,7 +2,29 @@
 
 \subsection{Energy consumption}
 
-As long as no music is being played, the energy consumption is low.
-It spikes upon button presses, when music is being played.
+As long as no music is being played, the energy consumption is low. This is because the board goes into deep sleep when idleing, see figure \ref{fig:idle} on page \pageref{fig:idle}.
+It spikes upon button presses, when music is being played, see figure \ref{fig:song_and_songs} and figure \ref{fig:sounds} on page \pageref{fig:song_and_songs}.
 
-There are two types of sound playback. Either the prerendered wav-file, or the on-the-fly generated sound effects. The difference in energy consumption between these two tasks is minimal, even though the wav playback only requires two array lookups, while the sound effects involve multiple math operations.
+There are two types of sound playback.
+Either the prerendered wav-file \ref{fig:playback_song}, or the on-the-fly generated sound effects \ref{fig:sounds}.
+The difference in energy consumption between these two tasks is minimal, even though the wav playback only requires two array lookups, while the sound effects involve multiple math operations.
+
+The differences can easier be seen in the table below.
+
+\begin{table}[ht!]
+    \begin{center}
+    \begin{tabular}{ | l | l | }
+        \hline
+        Instance            & Average energy usage \\
+        \hline
+        Idle                & 1.93 \si{\micro\ampere} \\
+        \hline
+        Song playback       & 2.50 \si{\milli\ampere} \\
+        \hline
+        Sound generation    & 5.25 \si{\milli\ampere} \\
+        \hline
+    \end{tabular}
+    \caption{Average current while idling for different methods of input reading}
+    \label{tab:energy_usage}
+    \end{center}
+\end{table}
