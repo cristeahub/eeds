@@ -1,0 +1,37 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Wed, 14 Dec 2011 11:03:48 +0100
+Subject: [PATCH] HACK! make stack dumps provoked by BUG a bit more helpful
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+the right fix would be to continue unwinding at the end when process is
+in handler mode
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/kernel/process.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm/kernel/process.c b/arch/arm/kernel/process.c
+index 94f6b05..541843b 100644
+--- a/arch/arm/kernel/process.c
++++ b/arch/arm/kernel/process.c
+@@ -304,11 +304,17 @@ void __show_regs(struct pt_regs *regs)
+ #endif
+ }
+ 
++#include <asm/unwind.h>
++
+ void show_regs(struct pt_regs * regs)
+ {
+ 	printk("\n");
+ 	__show_regs(regs);
++#ifdef CONFIG_CPU_V7M
++	unwind_backtrace(regs, current);
++#else
+ 	dump_stack();
++#endif
+ }
+ 
+ ATOMIC_NOTIFIER_HEAD(thread_notify_head);

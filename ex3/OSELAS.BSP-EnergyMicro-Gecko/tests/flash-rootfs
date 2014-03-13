@@ -1,0 +1,5 @@
+#! /bin/sh
+
+eACommander >&2 -r \
+	--address 0x8c400000 -f "${PTXDIST_PLATFORMDIR}/images/root.romfs" \
+	-r

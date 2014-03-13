@@ -1,0 +1,8 @@
+#! /bin/sh
+
+eACommander >&2 -r \
+	--address 0x00000000 -f "${PTXDIST_PLATFORMDIR}/images/geckoboot-image" \
+	--address 0x00080000 -f "${PTXDIST_PLATFORMDIR}/images/efm32gg-dk3750.dtb" \
+	--address 0x8c000000 -f "${PTXDIST_PLATFORMDIR}/images/linuximage" \
+	--address 0x8c400000 -f "${PTXDIST_PLATFORMDIR}/images/root.romfs" \
+	-r

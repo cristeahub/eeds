@@ -1,0 +1,34 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Thu, 4 Oct 2012 13:32:51 +0200
+Subject: [PATCH] HACK! ARM: increase TASK_SIZE for !MMU
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This is needed for strncpy_from_user and friends since
+
+	8c56cc8 (ARM: 7449/1: use generic strnlen_user and strncpy_from_user functions)
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/include/asm/memory.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/include/asm/memory.h b/arch/arm/include/asm/memory.h
+index e750a93..f0155d4 100644
+--- a/arch/arm/include/asm/memory.h
++++ b/arch/arm/include/asm/memory.h
+@@ -91,9 +91,12 @@
+  * It is difficult to define and perhaps will never meet the original meaning
+  * of this define that was meant to.
+  * Fortunately, there is no reference for this in noMMU mode, for now.
++ *
++ * HACK: copy_from_user must even handle copying from flash. So don't impose a
++ * limit at all. Not sure this is correct ...
+  */
+ #ifndef TASK_SIZE
+-#define TASK_SIZE		(CONFIG_DRAM_SIZE)
++#define TASK_SIZE		(~0UL)
+ #endif
+ 
+ #ifndef TASK_UNMAPPED_BASE

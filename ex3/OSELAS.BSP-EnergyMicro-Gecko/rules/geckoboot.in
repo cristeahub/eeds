@@ -1,0 +1,7 @@
+## SECTION=project_specific
+
+config GECKOBOOT
+	tristate
+	prompt "geckoboot"
+	help
+	  FIXME

@@ -1,0 +1,31 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Tue, 13 Dec 2011 21:37:46 +0100
+Subject: [PATCH] HACK! don't reserve memory for device tree if it's below
+ PHYS_OFFSET
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This allows to keep the device tree blob in the unregistered 128k SRAM
+on efm32.
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/kernel/devtree.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/kernel/devtree.c b/arch/arm/kernel/devtree.c
+index f35906b..ba4e182 100644
+--- a/arch/arm/kernel/devtree.c
++++ b/arch/arm/kernel/devtree.c
+@@ -43,6 +43,10 @@ void __init arm_dt_memblock_reserve(void)
+ 	if (!initial_boot_params)
+ 		return;
+ 
++	if ((unsigned long)initial_boot_params < PHYS_OFFSET)
++		/* assume the dtb is located in ro memory */
++		return;
++
+ 	/* Reserve the dtb region */
+ 	memblock_reserve(virt_to_phys(initial_boot_params),
+ 			 be32_to_cpu(initial_boot_params->totalsize));

@@ -1,0 +1,30 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Mon, 30 Sep 2013 11:11:58 +0200
+Subject: [PATCH] ARM: allow MULTIPLATFORM on no-MMU machines
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+There is no technical reason to not use the benefits of MULTIPLATFORM on a
+no-MMU machine and my not-yet-mainline efm32 port does work just fine with
+it. So drop the dependency.
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/Kconfig | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index efdd6ef..314e396 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -302,8 +302,7 @@ choice
+ 
+ config ARCH_MULTIPLATFORM
+ 	bool "Allow multiple platforms to be selected"
+-	depends on MMU
+-	select ARM_PATCH_PHYS_VIRT
++	select ARM_PATCH_PHYS_VIRT if MMU && !XIP_KERNEL
+ 	select AUTO_ZRELADDR
+ 	select COMMON_CLK
+ 	select MULTI_IRQ_HANDLER

@@ -1,0 +1,9 @@
+## SECTION=project_specific
+
+config HOST_ENERGYAWARETOOLS
+	tristate
+	prompt "energyawaretools"
+	help
+	  Tools to work with the EnergyMicro GiantGecko developmentboard.
+	  Actually used here is only eACommander to write kernel and rootfs via
+	  USB into the GiantGecko's flash.

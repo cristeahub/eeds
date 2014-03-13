@@ -1,0 +1,48 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Mon, 18 Nov 2013 09:45:45 +0100
+Subject: [PATCH] ARM: efm32gg-dk3750: add simple-framebuffer
+
+---
+ arch/arm/Kconfig                     |  1 +
+ arch/arm/boot/dts/efm32gg-dk3750.dts | 11 ++++++++++-
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 66ccc7c..68e58b2 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1605,6 +1605,7 @@ endchoice
+ 
+ config PAGE_OFFSET
+ 	hex
++	default PHYS_OFFSET if !MMU
+ 	default 0x40000000 if VMSPLIT_1G
+ 	default 0x80000000 if VMSPLIT_2G
+ 	default 0xC0000000
+diff --git a/arch/arm/boot/dts/efm32gg-dk3750.dts b/arch/arm/boot/dts/efm32gg-dk3750.dts
+index aa5c0f6..aeda85e 100644
+--- a/arch/arm/boot/dts/efm32gg-dk3750.dts
++++ b/arch/arm/boot/dts/efm32gg-dk3750.dts
+@@ -17,7 +17,7 @@
+ 	};
+ 
+ 	memory {
+-		reg = <0x88000000 0x400000>;
++		reg = <0x88000000 0x3da000>;
+ 	};
+ 
+ 	soc {
+@@ -83,4 +83,13 @@
+ 			status = "ok";
+ 		};
+ 	};
++
++	framebuffer {
++		compatible = "simple-framebuffer";
++		reg = <0x883da000 (320 * 240 * 2)>;
++		width = <320>;
++		height = <240>;
++		stride = <(320 * 2)>;
++		format = "r5g6b5";
++	};
+ };

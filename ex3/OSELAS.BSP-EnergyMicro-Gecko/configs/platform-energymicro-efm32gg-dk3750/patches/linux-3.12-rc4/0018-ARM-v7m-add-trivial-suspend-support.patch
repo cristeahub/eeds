@@ -1,0 +1,25 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Wed, 1 Feb 2012 10:00:00 +0100
+Subject: [PATCH] ARM: v7m: add trivial suspend support
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index cc24241..66ccc7c 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -2283,7 +2283,7 @@ source "kernel/power/Kconfig"
+ config ARCH_SUSPEND_POSSIBLE
+ 	depends on !ARCH_S5PC100
+ 	depends on CPU_ARM920T || CPU_ARM926T || CPU_FEROCEON || CPU_SA1100 || \
+-		CPU_V6 || CPU_V6K || CPU_V7 || CPU_XSC3 || CPU_XSCALE || CPU_MOHAWK
++		CPU_V6 || CPU_V6K || CPU_V7 || CPU_V7M || CPU_XSC3 || CPU_XSCALE || CPU_MOHAWK
+ 	def_bool y
+ 
+ config ARM_CPU_SUSPEND

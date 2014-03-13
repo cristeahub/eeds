@@ -1,0 +1,20 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Thu, 7 Feb 2013 09:43:24 +0100
+Subject: [PATCH] HACK! work around for big images
+
+---
+ arch/arm/kernel/head-nommu.S | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/kernel/head-nommu.S b/arch/arm/kernel/head-nommu.S
+index 14235ba..3ae5375 100644
+--- a/arch/arm/kernel/head-nommu.S
++++ b/arch/arm/kernel/head-nommu.S
+@@ -64,6 +64,7 @@ ENTRY(stext)
+ #endif
+ 	bl	__lookup_processor_type		@ r5=procinfo r9=cpuid
+ 	movs	r10, r5				@ invalid processor (r5=0)?
++	it	eq
+ 	beq	__error_p				@ yes, error 'p'
+ 
+ #ifdef CONFIG_ARM_MPU

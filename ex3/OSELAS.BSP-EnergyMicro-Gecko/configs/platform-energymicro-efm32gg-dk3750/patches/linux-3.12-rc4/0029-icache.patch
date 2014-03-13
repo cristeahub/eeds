@@ -1,0 +1,78 @@
+diff -rupN linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg-dk3750.dts linux-3.12-rc4_diff/arch/arm/boot/dts/efm32gg-dk3750.dts
+--- linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg-dk3750.dts	2013-12-13 09:55:07.056524466 +0100
++++ linux-3.12-rc4_diff/arch/arm/boot/dts/efm32gg-dk3750.dts	2013-12-13 10:06:18.932077847 +0100
+@@ -13,11 +13,11 @@
+ 	compatible = "efm32,dk3750";
+ 
+ 	chosen {
+-		bootargs = "console=ttyefm4,115200 init=/linuxrc ignore_loglevel ihash_entries=64 dhash_entries=64 earlyprintk uclinux.physaddr=0x8c400000 root=/dev/mtdblock0";
++		bootargs = "console=ttyefm4,115200 init=/linuxrc ignore_loglevel ihash_entries=64 dhash_entries=64 earlyprintk uclinux.physaddr=0x18400000 root=/dev/mtdblock0";
+ 	};
+ 
+ 	memory {
+-		reg = <0x88000000 0x3da000>;
++		reg = <0x16000000 0x3da000>;
+ 	};
+ 
+ 	soc {
+diff -rupN linux-3.12-rc4_original/arch/arm/configs/efm32_defconfig linux-3.12-rc4_diff/arch/arm/configs/efm32_defconfig
+--- linux-3.12-rc4_original/arch/arm/configs/efm32_defconfig	2013-12-13 09:55:07.140523410 +0100
++++ linux-3.12-rc4_diff/arch/arm/configs/efm32_defconfig	2013-12-13 10:19:34.410077334 +0100
+@@ -19,15 +19,15 @@ CONFIG_EMBEDDED=y
+ CONFIG_ARCH_EFM32=y
+ # CONFIG_KUSER_HELPERS is not set
+ CONFIG_SET_MEM_PARAM=y
+-CONFIG_DRAM_BASE=0x88000000
+-CONFIG_DRAM_SIZE=0x00400000
+-CONFIG_FLASH_MEM_BASE=0x8c000000
++CONFIG_DRAM_BASE=0x16000000
++CONFIG_DRAM_SIZE=0x003da000
++CONFIG_FLASH_MEM_BASE=0x18000000
+ CONFIG_FLASH_SIZE=0x01000000
+ CONFIG_PREEMPT=y
+ CONFIG_ZBOOT_ROM_TEXT=0x0
+ CONFIG_ZBOOT_ROM_BSS=0x0
+ CONFIG_XIP_KERNEL=y
+-CONFIG_XIP_PHYS_ADDR=0x8c000000
++CONFIG_XIP_PHYS_ADDR=0x18000000
+ CONFIG_BINFMT_FLAT=y
+ CONFIG_BINFMT_SHARED_FLAT=y
+ # CONFIG_COREDUMP is not set
+diff -rupN linux-3.12-rc4_original/arch/arm/mach-efm32/bootloader.S linux-3.12-rc4_diff/arch/arm/mach-efm32/bootloader.S
+--- linux-3.12-rc4_original/arch/arm/mach-efm32/bootloader.S	2013-12-13 09:54:51.768716660 +0100
++++ linux-3.12-rc4_diff/arch/arm/mach-efm32/bootloader.S	2013-12-13 10:13:54.474350905 +0100
+@@ -48,8 +48,8 @@ reset:
+ 	str	r1, [r0]
+ 
+ 	/* Zero PSRAM */
+-	ldr	r0, =(0x88000000)
+-	ldr	r1, =(0x88400000)
++	ldr	r0, =(0x16000000)
++	ldr	r1, =(0x16400000)
+ 	mov	r2, #0
+ 	mov	r3, #0
+ 	mov	r4, #0
+@@ -63,7 +63,7 @@ reset:
+ 	mov	r7, #'<'
+ 	str	r7, [r6]
+ 	mov	r7, #'*'
+-	ldr     r0, =(0x88000000)
++	ldr     r0, =(0x16000000)
+ 1:	ldmia	r0!, {r2-r5}
+ 	orr	r2, r3
+ 	orr	r4, r5
+@@ -236,12 +236,12 @@ ataglist:
+ 	.int	0x00000004		/* .size */
+ 	.int	0x54410002		/* .tag = ATAG_MEM */
+ 	.int	0x00400000		/* .size = 4 MiB */
+-	.int	0x88000000		/* .start = SRAM_BASE */
++	.int	0x16000000		/* .start = SRAM_BASE */
+ 	/* ATAG_CMDLINE */
+ cmdline:
+ 	.int	(cmdline_end - cmdline) >> 2	/* .size */
+ 	.int	0x54410009		/* .tag = ATAG_CMDLINE */
+-	.asciz	"console=ttyefm4,115200 ignore_loglevel ihash_entries=64 dhash_entries=64 rootfstype=romfs init=/linuxrc uclinux.physaddr=0x8c000000 root=/dev/mtdblock0 earlyprintk"
++	.asciz	"console=ttyefm4,115200 ignore_loglevel ihash_entries=64 dhash_entries=64 rootfstype=romfs init=/linuxrc uclinux.physaddr=0x18000000 root=/dev/mtdblock0 earlyprintk"
+ 	.align	2, 0
+ cmdline_end:
+ 	/* ATAG_NONE */

@@ -1,0 +1,9 @@
+## SECTION=hosttools_noprompt
+
+config HOST_GENROMFS
+	tristate
+	default ALLYES
+	help
+	  You need it to build a romfs filesystem.  romfs is a small,
+	  read-only filesystem intended for installation/rescue disks
+	  or "embedded" applications.

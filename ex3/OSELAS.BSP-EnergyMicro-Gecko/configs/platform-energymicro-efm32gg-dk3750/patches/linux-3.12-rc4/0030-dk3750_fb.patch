@@ -1,0 +1,2117 @@
+diff -rupN linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg-dk3750.dts linux-3.12-rc4_diff/arch/arm/boot/dts/efm32gg-dk3750.dts
+--- linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg-dk3750.dts	2013-12-13 13:29:18.098964984 +0100
++++ linux-3.12-rc4_diff/arch/arm/boot/dts/efm32gg-dk3750.dts	2013-12-13 15:07:06.105194155 +0100
+@@ -84,11 +84,11 @@
+ 		};
+ 	};
+ 
+-	framebuffer {
+-		compatible = "simple-framebuffer";
+-		reg = <0x883da000 (320 * 240 * 2)>;
+-		width = <320>;
+-		height = <240>;
++ 	framebuffer {
++		compatible = "dk3750_fb";
++		reg = <0x84000000 0x4000000>;
++ 		width = <320>;
++ 		height = <240>;
+ 		stride = <(320 * 2)>;
+ 		format = "r5g6b5";
+ 	};
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/bsp_dk_bcreg_3201.h linux-3.12-rc4_diff/drivers/video/dk3750_fb/bsp_dk_bcreg_3201.h
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/bsp_dk_bcreg_3201.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/bsp_dk_bcreg_3201.h	2013-12-13 10:44:59.598903114 +0100
+@@ -0,0 +1,264 @@
++/**************************************************************************//**
++ * @file
++ * @brief Board Control register definitions
++ * @author Energy Micro AS
++ * @version 3.20.2
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
++ *******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************/
++#ifndef __BSP_DK_BCREG_3201_H
++#define __BSP_DK_BCREG_3201_H
++
++#include <linux/types.h>
++
++/***************************************************************************//**
++ * @addtogroup BSP
++ * @{
++ ******************************************************************************/
++
++/***************************************************************************//**
++ * @addtogroup BSP_DK API for DK's
++ * @{
++ ******************************************************************************/
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/**************************************************************************//**
++ * Defines FPGA register bank for Energy Micro Development Kit board,
++ * i.e. board control registers
++ *****************************************************************************/
++#define BC_REGISTER_BASE    0x80000000  /**< Board Controller registers base address */
++#define BC_SSD2119_BASE     0x84000000  /**< TFT-LCD controller */
++#define BC_PSRAM_BASE       0x88000000  /**< PSRAM base address */
++#define BC_FLASH_BASE       0x8C000000  /**< External Flash base address */
++
++
++/**************************************************************************//**
++ * Defines bit fields for board control registers
++ *****************************************************************************/
++
++/* Define registers in a similar manner to CMSIS standards */
++/** Read/Write board controller register */
++#define __IO    volatile
++
++/** Board Controller Register definiton */
++typedef struct
++{
++  __IO uint16_t RESERVERD0;        /**< 0x00 - Reserved */
++  __IO uint16_t EM;                /**< 0x02 - Energy Mode indicator  */
++  __IO uint16_t MAGIC;             /**< 0x04 - Should always read 0xEF32 */
++
++  __IO uint16_t UIF_LEDS;          /**< 0x06 - On board LEDs */
++  __IO uint16_t UIF_PB;            /**< 0x08 - Push button PB0-PB4 status */
++  __IO uint16_t UIF_DIP;           /**< 0x0A - DIP switch status */
++  __IO uint16_t UIF_JOYSTICK;      /**< 0x0C - Joystick presses */
++  __IO uint16_t UIF_AEM;           /**< 0x0E - AEM button */
++  __IO uint16_t UIF_CTRL;          /**< 0x10 - CPLD control register */
++  __IO uint16_t DISPLAY_CTRL;      /**< 0x12 - SSD2119 TFT display control */
++  __IO uint16_t EBI_CTRL;          /**< 0x14 - Extended Address Mode control */
++  __IO uint16_t ARB_CTRL;          /**< 0x16 - Arbiter control, board control or EFM32GG access to display */
++  __IO uint16_t PERICON;           /**< 0x18 - Peripheral Control, on board switches */
++  __IO uint16_t SPI_DEMUX;         /**< 0x1A - SPI DEMUX */
++  __IO uint16_t RESERVERD1[0x02];  /**< 0x1C - Reserved */
++
++  __IO uint16_t ADC_WRITE;         /**< 0x20 - AEM ADC SPI interface */
++  __IO uint16_t ADC_STATUS;        /**< 0x22 - AEM ADC SPI interface */
++  __IO uint16_t ADC_READ;          /**< 0x24 - AEM ADC SPI interface */
++
++  __IO uint16_t CLKRST;            /**< 0x26 - Clock and reset control */
++
++  __IO uint16_t HW_VERSION;        /**< 0x28 - Hardware version */
++  __IO uint16_t FW_BUILDNO;        /**< 0x2A - Firmware build number */
++  __IO uint16_t FW_VERSION;        /**< 0x2C - Firmware version */
++
++  __IO uint16_t SCRATCH_COMMON;    /**< 0x2E - Shared register between board controller and EFM32 */
++
++  __IO uint16_t SCRATCH_EFM0;      /**< 0x30 - EFM32 accessible registers */
++  __IO uint16_t SCRATCH_EFM1;      /**< 0x32 */
++  __IO uint16_t SCRATCH_EFM2;      /**< 0x34 */
++  __IO uint16_t SCRATCH_EFM3;      /**< 0x36 */
++
++  __IO uint16_t SCRATCH_BC0;       /**< 0x38 - Board Control registers */
++  __IO uint16_t SCRATCH_BC1;       /**< 0x3A */
++  __IO uint16_t SCRATCH_BC2;       /**< 0x3C */
++  __IO uint16_t SCRATCH_BC3;       /**< 0x3E */
++
++  __IO uint16_t INTFLAG;           /**< 0x40 - Interrupt Status flags */
++  __IO uint16_t INTEN;             /**< 0x42 - Interrupt Enable flags */
++
++  __IO uint16_t RESERVERD3[0x1e];  /**< 0x44 - Reserved */
++
++  __IO uint16_t BC_MBOX_TXCTRL;    /**< 0x80 - BC <-> EFM32 communication channel */
++  __IO uint16_t BC_MBOX_TXDATA;    /**< 0x82 */
++  __IO uint16_t BC_MBOX_TXSTATUS0; /**< 0x84 */
++  __IO uint16_t BC_MBOX_TXSTATUS1; /**< 0x86 */
++
++  __IO uint16_t RESERVED4[0x0d];   /**< 0xa0 - Reserved */
++
++  __IO uint16_t MBOX_TXCTRL;       /**< 0xa2 - BC <-> EFM32 communication channel */
++  __IO uint16_t MBOX_TXDATA;       /**< 0xa4 */
++  __IO uint16_t MBOX_TXSTATUS0;    /**< 0xa6 */
++  __IO uint16_t MBOX_TXSTATUS1;    /**< 0xa8 */
++
++  __IO uint16_t RESERVED5[0x0b];   /**< 0xaa - Reserved */
++
++  __IO uint16_t BUF_CTRL;          /**< 0xc0 - Buffer Controller Control */
++} BC_TypeDef;
++
++/* Cast into register structure */
++#define BC_REGISTER                         ((BC_TypeDef *) BC_REGISTER_BASE) /**< Register block base */
++
++/* Energy Mode indicator */
++#define BC_EM_EM0                           (0)  /**< Indicate EM0 */
++#define BC_EM_EM1                           (1)  /**< Indicate EM1 */
++#define BC_EM_EM2                           (2)  /**< Indicate EM2 */
++#define BC_EM_EM3                           (3)  /**< Indicate EM3 */
++#define BC_EM_EM4                           (4)  /**< Indicate EM4 */
++
++/* Magic value */
++#define BC_MAGIC_VALUE                      (0xef32)  /**< Magic */
++
++/* Push buttons, PB1-PB4 */
++#define BC_UIF_PB_MASK                      (0x000f) /**< Push button mask */
++#define BC_UIF_PB1                          (1 << 0) /**< Push button PB1 */
++#define BC_UIF_PB2                          (1 << 1) /**< Push button PB2 */
++#define BC_UIF_PB3                          (1 << 2) /**< Push button PB3 */
++#define BC_UIF_PB4                          (1 << 3) /**< Push button PB4 */
++
++/* Dip switch */
++#define BC_DIPSWITCH_MASK                   (0x000f)  /**< Dip switch mask */
++
++/* Joystick directions */
++#define BC_UIF_JOYSTICK_MASK                (0x001f)      /**< Joystick mask */
++#define BC_UIF_JOYSTICK_DOWN                (1 << 0)      /**< Joystick down */
++#define BC_UIF_JOYSTICK_RIGHT               (1 << 1)      /**< Joystick right */
++#define BC_UIF_JOYSTICK_UP                  (1 << 2)      /**< Joystick up */
++#define BC_UIF_JOYSTICK_LEFT                (1 << 3)      /**< Joystick left */
++#define BC_UIF_JOYSTICK_CENTER              (1 << 4)      /**< Joystick center button */
++
++/* AEM state */
++#define BC_UIF_AEM_BC                       (0) /**< AEM button state, BC controls buttons */
++#define BC_UIF_AEM_EFM                      (1) /**< AEM button state, EFM32 controls buttons */
++
++/* Display control */
++#define BC_DISPLAY_CTRL_RESET               (1 << 1)                          /**< Reset */
++#define BC_DISPLAY_CTRL_POWER_ENABLE        (1 << 0)                          /**< Display Control Power and Backlight Enable */
++#define BC_DISPLAY_CTRL_MODE_SHIFT          2                                 /**< Bit offset value for Display_Mode setting */
++#define BC_DISPLAY_CTRL_MODE_8080           (0 << BC_DISPLAY_CTRL_MODE_SHIFT) /**< Address mapped mode */
++#define BC_DISPLAY_CTRL_MODE_GENERIC        (1 << BC_DISPLAY_CTRL_MODE_SHIFT) /**< Direct Drive + SPI mode */
++
++/* EBI control - extended address range enable bit  */
++#define BC_EBI_CTRL_EXTADDR_MASK            (0x0001) /**< Enable extended addressing support */
++
++/* Arbiter control - directs access to display controller  */
++#define BC_ARB_CTRL_SHIFT                   0                        /**< Bit offset value for ARB_CTRL setting */
++#define BC_ARB_CTRL_BC                      (0 << BC_ARB_CTRL_SHIFT) /**< BC drives display */
++#define BC_ARB_CTRL_EBI                     (1 << BC_ARB_CTRL_SHIFT) /**< EFM32GG EBI drives display, memory mapped or direct drive */
++#define BC_ARB_CTRL_SPI                     (2 << BC_ARB_CTRL_SHIFT) /**< EFM32GG SPI drives display */
++
++/* Interrupt flag registers, INTEN and INTFLAG */
++#define BC_INTEN_MASK                       (0x000f)  /**< Interrupt enable mask */
++#define BC_INTEN_PB                         (1 << 0)  /**< Push Button Interrupt enable */
++#define BC_INTEN_DIP                        (1 << 1)  /**< DIP Switch Interrupt enable */
++#define BC_INTEN_JOYSTICK                   (1 << 2)  /**< Joystick Interrupt enable */
++#define BC_INTEN_AEM                        (1 << 3)  /**< AEM Interrupt enable */
++#define BC_INTEN_ETH                        (1 << 4)  /**< Ethernet Interrupt enable */
++
++#define BC_INTFLAG_MASK                     (0x000f)  /**< Interrupt flag mask */
++#define BC_INTFLAG_PB                       (1 << 0)  /**< Push Button interrupt triggered */
++#define BC_INTFLAG_DIP                      (1 << 1)  /**< DIP interrupt triggered */
++#define BC_INTFLAG_JOYSTICK                 (1 << 2)  /**< Joystick interrupt triggered */
++#define BC_INTFLAG_AEM                      (1 << 3)  /**< AEM Interrupt triggered */
++#define BC_INTFLAG_ETH                      (1 << 4)  /**< Ethernet Interrupt triggered */
++
++/* Peripheral control registers */
++#define BC_PERICON_RS232_SHUTDOWN_SHIFT     13 /**< RS232 enable MUX bit */
++#define BC_PERICON_RS232_UART_SHIFT         12 /**< UART enable */
++#define BC_PERICON_RS232_LEUART_SHIFT       11 /**< LEUART enable */
++#define BC_PERICON_I2C_SHIFT                10 /**< I2C enable */
++#define BC_PERICON_I2S_ETH_SEL_SHIFT        9  /**< I2S/ETH/TFT SPI enable */
++#define BC_PERICON_I2S_ETH_SHIFT            8  /**< I2S/ETH mux select */
++#define BC_PERICON_TRACE_SHIFT              7  /**< ETM Trace enable */
++#define BC_PERICON_TOUCH_SHIFT              6  /**< Touch enable */
++#define BC_PERICON_AUDIO_IN_SHIFT           5  /**< Audio In enable */
++#define BC_PERICON_AUDIO_OUT_SEL_SHIFT      4  /**< Audio Out I2S/DAC select */
++#define BC_PERICON_AUDIO_OUT_SHIFT          3  /**< Audio Out enable */
++#define BC_PERICON_ANALOG_DIFF_SHIFT        2  /**< Analog Diff enable */
++#define BC_PERICON_ANALOG_SE_SHIFT          1  /**< Anallog SE enable */
++#define BC_PERICON_SPI_SHIFT                0  /**< Micro-SD SPI enable */
++
++/* SPI DEMUX control */
++#define BC_SPI_DEMUX_SLAVE_MASK             (0x0003) /**< Mask for SPI MUX bits */
++#define BC_SPI_DEMUX_SLAVE_AUDIO            (0)      /**< SPI interface to I2S Audio */
++#define BC_SPI_DEMUX_SLAVE_ETHERNET         (1)      /**< SPI interface to Ethernet controller */
++#define BC_SPI_DEMUX_SLAVE_DISPLAY          (2)      /**< SPI interface to TFT-LCD-SSD2119 controller */
++
++/* ADC */
++#define BC_ADC_STATUS_DONE                  (0)  /**< ADC Status Done */
++#define BC_ADC_STATUS_BUSY                  (1)  /**< ADC Status Busy */
++
++/* Clock and Reset Control */
++#define BC_CLKRST_FLASH_SHIFT               (1 << 1) /**< Flash Reset Control */
++#define BC_CLKRST_ETH_SHIFT                 (1 << 2) /**< Ethernet Reset Control */
++
++/* Hardware version information */
++#define BC_HW_VERSION_PCB_MASK              (0x07f0)  /**< PCB Version mask */
++#define BC_HW_VERSION_PCB_SHIFT             (4)       /**< PCB Version shift */
++#define BC_HW_VERSION_BOARD_MASK            (0x000f)  /**< Board version mask */
++#define BC_HW_VERSION_BOARD_SHIFT           (0)       /**< Board version shift  */
++
++/* Firmware version information */
++#define BC_FW_VERSION_MAJOR_MASK            (0xf000) /**< FW Version major mask */
++#define BC_FW_VERSION_MAJOR_SHIFT           (12)     /**< FW version major shift */
++#define BC_FW_VERSION_MINOR_MASK            (0x0f00) /**< FW version minor mask */
++#define BC_FW_VERSION_MINOR_SHIFT           (8)      /**< FW version minor shift */
++#define BC_FW_VERSION_PATCHLEVEL_MASK       (0x00ff) /**< FW Patchlevel mask */
++#define BC_FW_VERSION_PATCHLEVEL_SHIFT      (0)      /**< FW Patchlevel shift */
++
++/* MBOX - BC <-> EFM32 communication */
++#define BC_MBOX_TXSTATUS0_FIFOEMPTY         (1 << 0) /**< BC/EFM32 communication register */
++#define BC_MBOX_TXSTATUS0_FIFOFULL          (1 << 1) /**< BC/EFM32 communication register */
++#define BC_MBOX_TXSTATUS0_FIFOUNDERFLOW     (1 << 4) /**< BC/EFM32 communication register */
++#define BC_MBOX_TXSTATUS0_FIFOOVERFLOW      (1 << 5) /**< BC/EFM32 communication register */
++
++#define BC_MBOX_TXSTATUS1_WORDCOUNT_MASK    (0x07FF) /**< BC/EFM32 communication register */
++
++/* Buffer Controller */
++#define BC_BUF_CTRL_CS_ENABLE               (1 << 0) /**< BC/EFM32 communication register */
++
++#ifdef __cplusplus
++}
++#endif
++
++/** @} (end group BSP_DK) */
++/** @} (end group BSP) */
++
++#endif  /* __BSP_DK_BCREG_3201_H */
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/dk3750_fb_mod.c linux-3.12-rc4_diff/drivers/video/dk3750_fb/dk3750_fb_mod.c
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/dk3750_fb_mod.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/dk3750_fb_mod.c	2013-12-13 17:10:50.567856019 +0100
+@@ -0,0 +1,444 @@
++/*
++ *  SSD2119 display driver for EFM32GG DK3750
++ *
++ *  Based on simplefb and EFM32 TFT example code
++ *
++ *  Asbjørn Djupdal 2013
++ *
++ */
++
++#include <linux/errno.h>
++#include <linux/fb.h>
++#include <linux/io.h>
++#include <linux/module.h>
++#include <linux/platform_data/simplefb.h>
++#include <linux/platform_device.h>
++#include <linux/delay.h>
++
++#include "bsp_dk_bcreg_3201.h"
++#include "io.h"
++#include "dmd_ssd2119.h"
++#include "dmdif_ssd2119_ebi.h"
++#include "dmd.h"
++
++// Custom IOCTLs 
++#define IOCTL_FB_DK3750_DIRTY 0x4680
++
++// TODO: move to platform data
++static uint8_t *dk3750_fb; // framebuffer
++struct resource *mem_resource;
++void *iomem;               // io registers
++
++static struct fb_fix_screeninfo dk3750_fb_fix = {
++	.id		= "dk3750_fb",
++	.type		= FB_TYPE_PACKED_PIXELS,
++	.visual		= FB_VISUAL_TRUECOLOR,
++	.accel		= FB_ACCEL_NONE,
++};
++
++static struct fb_var_screeninfo dk3750_fb_var = {
++	.height		= -1,
++	.width		= -1,
++	.activate	= FB_ACTIVATE_NOW,
++	.vmode		= FB_VMODE_NONINTERLACED,
++};
++
++static ssize_t dk3750_fb_read(struct fb_info *info, char __user *buf,
++         size_t count, loff_t *ppos)
++{
++  // do not allow reading, dmd driver code comment claims it does not work
++  return -EINVAL;
++}
++
++static ssize_t dk3750_fb_write(struct fb_info *info, const char __user *buf,
++          size_t count, loff_t *ppos)
++{
++  // FIXME: copy_from_user
++
++  int pixel = *ppos / 2;
++  int x = pixel % DMD_HORIZONTAL_SIZE;
++  int y = pixel / DMD_HORIZONTAL_SIZE;
++  int numPixels = count / 2;
++
++  if((*ppos + count) > (DMD_HORIZONTAL_SIZE * DMD_VERTICAL_SIZE * 2))
++    return -EINVAL;
++  if(*ppos % 2) return -EINVAL;
++  if(count % 2) return -EINVAL;
++
++  DMD_setClippingArea(0, 0, DMD_HORIZONTAL_SIZE, DMD_VERTICAL_SIZE);
++  DMD_writeData(x, y, buf, numPixels);
++
++  return count;
++}
++
++int dk3750_fb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
++{
++  // FIXME: copy_from_user
++
++  // Custom ioctl to mark a region of the framebuffer as "dirty" (need
++  // pushing to display controller)
++  // Takes a rectangle as argument
++  if(cmd == IOCTL_FB_DK3750_DIRTY) {
++    struct fb_copyarea *rect = (struct fb_copyarea*)arg;
++    DMD_setClippingArea(rect->dx, rect->dy, rect->width, rect->height);
++    DMD_blitFB((uint16_t*)dk3750_fb);
++
++  } else {
++    return -EINVAL;
++  }
++  return 0;
++}
++
++static void dk3750_fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
++{
++  cfb_fillrect(info, rect);
++  DMD_setClippingArea(rect->dx, rect->dy, rect->width, rect->height);
++  DMD_blitFB((uint16_t*)dk3750_fb);
++}
++
++static void dk3750_fb_copyarea(struct fb_info *info,
++                               const struct fb_copyarea *region)
++{
++  cfb_copyarea(info, region);
++  DMD_setClippingArea(region->dx, region->dy, region->width, region->height);
++  DMD_blitFB((uint16_t*)dk3750_fb);
++}
++
++static void dk3750_fb_imageblit(struct fb_info *info, const struct fb_image *image)
++{
++  cfb_imageblit(info, image);
++  DMD_setClippingArea(image->dx, image->dy, image->width, image->height);
++  DMD_blitFB((uint16_t*)dk3750_fb);
++}
++
++static int dk3750_fb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
++			      u_int transp, struct fb_info *info)
++{
++	u32 *pal = info->pseudo_palette;
++	u32 cr = red >> (16 - info->var.red.length);
++	u32 cg = green >> (16 - info->var.green.length);
++	u32 cb = blue >> (16 - info->var.blue.length);
++	u32 value;
++
++	if (regno >= 16)
++		return -EINVAL;
++
++	value = (cr << info->var.red.offset) |
++		(cg << info->var.green.offset) |
++		(cb << info->var.blue.offset);
++	if (info->var.transp.length > 0) {
++		u32 mask = (1 << info->var.transp.length) - 1;
++		mask <<= info->var.transp.offset;
++		value |= mask;
++	}
++	pal[regno] = value;
++
++	return 0;
++}
++
++static struct fb_ops dk3750_fb_ops = {
++	.owner		= THIS_MODULE,
++  .fb_read = dk3750_fb_read,
++  .fb_write = dk3750_fb_write,
++  .fb_ioctl = dk3750_fb_ioctl,
++  .fb_setcolreg	= dk3750_fb_setcolreg,
++  .fb_fillrect = dk3750_fb_fillrect,
++  .fb_copyarea = dk3750_fb_copyarea,
++  .fb_imageblit = dk3750_fb_imageblit,
++};
++
++static struct simplefb_format dk3750_fb_formats[] = SIMPLEFB_FORMATS;
++
++struct dk3750_fb_params {
++	u32 width;
++	u32 height;
++	u32 stride;
++	struct simplefb_format *format;
++};
++
++static int dk3750_fb_parse_dt(struct platform_device *pdev,
++			   struct dk3750_fb_params *params)
++{
++	struct device_node *np = pdev->dev.of_node;
++	int ret;
++	const char *format;
++	int i;
++
++	ret = of_property_read_u32(np, "width", &params->width);
++	if (ret) {
++		dev_err(&pdev->dev, "Can't parse width property\n");
++		return ret;
++	}
++
++	ret = of_property_read_u32(np, "height", &params->height);
++	if (ret) {
++		dev_err(&pdev->dev, "Can't parse height property\n");
++		return ret;
++	}
++
++	ret = of_property_read_u32(np, "stride", &params->stride);
++	if (ret) {
++		dev_err(&pdev->dev, "Can't parse stride property\n");
++		return ret;
++	}
++
++	ret = of_property_read_string(np, "format", &format);
++	if (ret) {
++		dev_err(&pdev->dev, "Can't parse format property\n");
++		return ret;
++	}
++	params->format = NULL;
++	for (i = 0; i < ARRAY_SIZE(dk3750_fb_formats); i++) {
++		if (strcmp(format, dk3750_fb_formats[i].name))
++			continue;
++		params->format = &dk3750_fb_formats[i];
++		break;
++	}
++	if (!params->format) {
++		dev_err(&pdev->dev, "Invalid format value\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int dk3750_fb_parse_pd(struct platform_device *pdev,
++			     struct dk3750_fb_params *params)
++{
++	struct simplefb_platform_data *pd = pdev->dev.platform_data;
++	int i;
++
++	params->width = pd->width;
++	params->height = pd->height;
++	params->stride = pd->stride;
++
++	params->format = NULL;
++	for (i = 0; i < ARRAY_SIZE(dk3750_fb_formats); i++) {
++		if (strcmp(pd->format, dk3750_fb_formats[i].name))
++			continue;
++
++		params->format = &dk3750_fb_formats[i];
++		break;
++	}
++
++	if (!params->format) {
++		dev_err(&pdev->dev, "Invalid format value\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static bool initBoard(void) {
++  uint16_t tmp;
++
++  if(*UIF_AEM != BC_UIF_AEM_EFM) {
++    printk(KERN_ALERT
++           "DK3750_FB: Not in EFM mode, press AEM button to continue\n");
++    // TODO: not sure how to handle this situation properly
++    while(*UIF_AEM != BC_UIF_AEM_EFM) msleep(100);
++  }
++
++  // TODO: is it OK to write registers here?
++
++  // display ebi
++  *ARB_CTRL = BC_ARB_CTRL_EBI;
++  
++  // assert reset
++  tmp  = *DISPLAY_CTRL;
++  tmp |= BC_DISPLAY_CTRL_RESET;
++  *DISPLAY_CTRL = tmp;
++
++  // power disable
++  tmp  = *DISPLAY_CTRL;
++  tmp &= ~(BC_DISPLAY_CTRL_POWER_ENABLE);
++  *DISPLAY_CTRL = tmp;
++
++  /* Short reset delay */
++  msleep(10);
++
++  // mode 8080
++  tmp &= ~(BC_DISPLAY_CTRL_MODE_GENERIC);
++  *DISPLAY_CTRL = tmp;
++
++  // power enable
++  tmp |= (BC_DISPLAY_CTRL_POWER_ENABLE);
++  *DISPLAY_CTRL = tmp;
++
++  // reset release
++  tmp &= ~(BC_DISPLAY_CTRL_RESET);
++  *DISPLAY_CTRL = tmp;
++
++  return true;
++}
++
++static int dk3750_fb_probe(struct platform_device *pdev)
++{
++	int ret;
++	struct dk3750_fb_params params;
++	struct fb_info *info;
++  struct resource *res;
++
++	if (fb_get_options("dk3750_fb", NULL))
++		return -ENODEV;
++
++	ret = -ENODEV;
++	if (pdev->dev.platform_data)
++		ret = dk3750_fb_parse_pd(pdev, &params);
++	else if (pdev->dev.of_node)
++		ret = dk3750_fb_parse_dt(pdev, &params);
++
++	if (ret)
++		return ret;
++
++	mem_resource = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!mem_resource) {
++		dev_err(&pdev->dev, "No memory resource\n");
++		return -EINVAL;
++	}
++
++  res = request_mem_region(mem_resource->start, resource_size(mem_resource), "dk3750_fb");
++  if(!res) {
++		dev_err(&pdev->dev, "Can't request mem\n");
++    return -ENOMEM;
++  }
++
++  iomem = ioremap_nocache(mem_resource->start, resource_size(mem_resource));
++  if(iomem == NULL) {
++    printk("Can't remap\n");
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++    return -EBUSY;
++  }
++
++  dk3750_fb = (uint8_t*)kmalloc(params.width * params.height * 2, GFP_KERNEL);
++  if(!dk3750_fb) {
++    printk(KERN_ERR "DK3750_FB: Can't allocate framebuffer\n");
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++    return -ENOMEM;
++  }
++
++  if(!initBoard()) {
++    printk(KERN_ERR "DK3750_FB: Can't init board\n");
++    kfree(dk3750_fb);
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++    return -EBUSY;
++  }
++
++  if(DMDIF_init((uint32_t)iomem, (uint32_t)(iomem + 2)) != DMD_OK) {
++    printk(KERN_ERR "DK3750_FB: Can't init DMDIF\n");
++    kfree(dk3750_fb);
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++    return -EBUSY;
++  }
++
++  if(DMD_init(0) != DMD_OK) {
++    printk(KERN_ERR "DK3750_FB: Can't init DMD\n");
++    kfree(dk3750_fb);
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++    return -EBUSY;
++  }
++
++  DMD_flipDisplay(1, 1);
++
++	info = framebuffer_alloc(sizeof(u32) * 16, &pdev->dev);
++	if (!info) {
++    kfree(dk3750_fb);
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++		return -ENOMEM;
++  }
++	platform_set_drvdata(pdev, info);
++
++	info->fix = dk3750_fb_fix;
++	info->fix.smem_start = (unsigned long)dk3750_fb;
++	info->fix.smem_len = params.width * params.height * 2;
++	info->fix.line_length = params.stride;
++
++	info->var = dk3750_fb_var;
++	info->var.xres = params.width;
++	info->var.yres = params.height;
++	info->var.xres_virtual = params.width;
++	info->var.yres_virtual = params.height;
++	info->var.bits_per_pixel = params.format->bits_per_pixel;
++	info->var.red = params.format->red;
++	info->var.green = params.format->green;
++	info->var.blue = params.format->blue;
++	info->var.transp = params.format->transp;
++
++	info->apertures = alloc_apertures(1);
++	if (!info->apertures) {
++		framebuffer_release(info);
++    kfree(dk3750_fb);
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++		return -ENOMEM;
++	}
++	info->apertures->ranges[0].base = info->fix.smem_start;
++	info->apertures->ranges[0].size = info->fix.smem_len;
++
++	info->fbops = &dk3750_fb_ops;
++	info->flags = FBINFO_DEFAULT | FBINFO_MISC_FIRMWARE;
++	info->screen_base = devm_ioremap(&pdev->dev, info->fix.smem_start,
++					 info->fix.smem_len);
++	if (!info->screen_base) {
++		framebuffer_release(info);
++    kfree(dk3750_fb);
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++		return -ENODEV;
++	}
++	info->pseudo_palette = (void *)(info + 1);
++
++	ret = register_framebuffer(info);
++	if (ret < 0) {
++		dev_err(&pdev->dev, "Unable to register dk3750_fb: %d\n", ret);
++		framebuffer_release(info);
++    kfree(dk3750_fb);
++    iounmap(iomem);
++    release_mem_region(mem_resource->start, resource_size(mem_resource));
++		return ret;
++	}
++
++	dev_info(&pdev->dev, "fb%d: dk3750_fb registered!\n", info->node);
++
++	return 0;
++}
++
++static int dk3750_fb_remove(struct platform_device *pdev)
++{
++	struct fb_info *info = platform_get_drvdata(pdev);
++
++  kfree(dk3750_fb);
++
++  iounmap(iomem);
++  release_mem_region(mem_resource->start, resource_size(mem_resource));
++
++	unregister_framebuffer(info);
++	framebuffer_release(info);
++
++	return 0;
++}
++
++static const struct of_device_id dk3750_fb_of_match[] = {
++	{ .compatible = "dk3750_fb", },
++	{ },
++};
++MODULE_DEVICE_TABLE(of, dk3750_fb_of_match);
++
++static struct platform_driver dk3750_fb_driver = {
++	.driver = {
++		.name = "dk3750_fb",
++		.owner = THIS_MODULE,
++		.of_match_table = dk3750_fb_of_match,
++	},
++	.probe = dk3750_fb_probe,
++	.remove = dk3750_fb_remove,
++};
++module_platform_driver(dk3750_fb_driver);
++
++MODULE_DESCRIPTION("DK3750 frame buffer driver");
++MODULE_LICENSE("GPL v2");
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd.h linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd.h
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd.h	2013-12-13 10:44:59.614902913 +0100
+@@ -0,0 +1,127 @@
++ /*************************************************************************//**
++ * @file dmd.h
++ * @brief Dot Matrix Display interface
++ * @author Energy Micro AS
++ * @version x.xx
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2013 Energy Micro AS, http://www.energymicro.com</b>
++ ******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************
++ *
++ * Adapted by Asbjørn Djupdal in 2014 for use in Linux FB driver
++ *
++ *****************************************************************************/
++
++#ifndef __DMD_H__
++#define __DMD_H__
++
++#include <linux/types.h>
++#include "em_types.h"
++/* TODO: remove this and replace with include types and ecodes */
++#define ECODE_DMD_BASE    0x00000000
++
++
++/* Error codes */
++/** Successful call */
++#define DMD_OK                                  0x00000000
++/** Driver not initialized correctly */
++#define DMD_ERROR_DRIVER_NOT_INITIALIZED        (ECODE_DMD_BASE | 0x0001)
++/** Driver is already initialized */
++#define DMD_ERROR_DRIVER_ALREADY_INITIALIZED    (ECODE_DMD_BASE | 0x0002)
++/** Length of data is larger than size of clip */
++#define DMD_ERROR_TOO_MUCH_DATA                 (ECODE_DMD_BASE | 0x0003)
++/** Pixel is outside current clipping area */
++#define DMD_ERROR_PIXEL_OUT_OF_BOUNDS           (ECODE_DMD_BASE | 0x0004)
++/** Clipping area is empty */
++#define DMD_ERROR_EMPTY_CLIPPING_AREA           (ECODE_DMD_BASE | 0x0005)
++/** Wrong device code */
++#define DMD_ERROR_WRONG_DEVICE_CODE             (ECODE_DMD_BASE | 0x0006)
++/** Memory error */
++#define DMD_ERROR_MEMORY_ERROR                  (ECODE_DMD_BASE | 0x0007)
++/** Error code expected, but didn't happen */
++#define DMD_ERROR_NO_ERROR_CODE                 (ECODE_DMD_BASE | 0x0008)
++/** Test run failed */
++#define DMD_ERROR_TEST_FAILED                   (ECODE_DMD_BASE | 0x0009)
++/** Function or option not supported - yet. */
++#define DMD_ERROR_NOT_SUPPORTED                 (ECODE_DMD_BASE | 0x000a)
++/** Not enough memory.  */
++#define DMD_ERROR_NOT_ENOUGH_MEMORY             (ECODE_DMD_BASE | 0x000b)
++
++/** Configuration parameter for DMD_init. This typedef is defined 'void' and
++    may be defined differently in the future. */
++typedef void DMD_InitConfig;
++
++/** @struct __DMD_DisplayGeometry
++ *  @brief Dimensions of the display
++ */
++typedef struct __DMD_DisplayGeometry
++{
++  /** Horizontal size of the display, in pixels */
++  uint16_t xSize;
++  /** Vertical size of the display, in pixels */
++  uint16_t ySize;
++  /** X coordinate of the top left corner of the clipping area */
++  uint16_t xClipStart;
++  /** Y coordinate of the top left corner of the clipping area */
++  uint16_t yClipStart;
++  /** Width of the clipping area */
++  uint16_t clipWidth;
++  /** Height of the clipping area */
++  uint16_t clipHeight;
++} DMD_DisplayGeometry; /**< Typedef for display dimensions */
++
++/** @struct __DMD_MemoryError
++ *  @brief Information about a memory error
++ */
++typedef struct __DMD_MemoryError
++{
++  /** X coordinate of the address where the error happened */
++  uint16_t x;
++  /** Y coordinate of the address where the error happened */
++  uint16_t y;
++  /** The color that was written to the memory address */
++  uint8_t  writtenColor[3];
++  /** The color that was read from the memory address */
++  uint8_t  readColor[3];
++} DMD_MemoryError; /**< Typedef for memory error information */
++
++/* Module prototypes */
++EMSTATUS DMD_init(DMD_InitConfig* initConfig);
++EMSTATUS DMD_getDisplayGeometry(DMD_DisplayGeometry **geometry);
++EMSTATUS DMD_setClippingArea(uint16_t xStart, uint16_t yStart,
++                             uint16_t width, uint16_t height);
++EMSTATUS DMD_writeData(uint16_t x, uint16_t y,
++                       const uint8_t data[], uint32_t numPixels);
++EMSTATUS DMD_blitFB(const uint16_t fb[]);
++EMSTATUS DMD_writeColor(uint16_t x, uint16_t y, uint16_t color,
++                        uint32_t numPixels);
++EMSTATUS DMD_sleep(void);
++EMSTATUS DMD_wakeUp(void);
++EMSTATUS DMD_flipDisplay(int horizontal, int vertical);
++
++#endif  /* __DISPLAY_DMD_H__ */
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/dmdif_ssd2119_ebi16.c linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmdif_ssd2119_ebi16.c
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/dmdif_ssd2119_ebi16.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmdif_ssd2119_ebi16.c	2013-12-13 10:44:59.614902913 +0100
+@@ -0,0 +1,239 @@
++/*************************************************************************//***
++ * @file dmdif_ssd2119_ebi.c
++ * @brief Dot matrix display interface using EBI
++ * @author Energy Micro AS
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
++ ******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************/
++
++#include <linux/types.h>
++#include "dmd.h"
++#include "dmd_ssd2119_registers.h"
++#include "dmd_ssd2119.h"
++#include "dmdif_ssd2119_ebi.h"
++//#include "bsp.h"
++
++/* Local function prototypes */
++static EMSTATUS setNextReg(uint8_t reg);
++
++static volatile uint16_t *command_register;
++static volatile uint16_t *data_register;
++
++/**************************************************************************//**
++*  @brief
++*  Initializes the data interface to the LCD controller SSD2119
++*
++*
++*  @param cmdRegAddr
++*  The address in memory where data to the command register in the display
++*  controller are written
++*  @param dataRegAddr
++*  The address in memory where data to the data register in the display
++*  controller are written
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMDIF_init(uint32_t cmdRegAddr, uint32_t dataRegAddr)
++{
++  command_register = (volatile uint16_t*) cmdRegAddr;
++  data_register    = (volatile uint16_t*) dataRegAddr;
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Writes a value to a control register in the LCD controller
++*
++*  @param reg
++*  The register that will be written to
++*  @param data
++*  The value to write to the register
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMDIF_writeReg(uint8_t reg, uint16_t data)
++{
++  setNextReg(reg);
++
++  *data_register = data;
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Reads the device code of the LCD controller
++*  DOESN'T WORK
++*
++*  @return
++*  The device code of the LCD controller
++******************************************************************************/
++uint16_t DMDIF_readDeviceCode(void)
++{
++  uint16_t deviceCode;
++
++  /* Reading from the oscillation control register gives the device code */
++  setNextReg(DMD_SSD2119_DEVICE_CODE_READ);
++
++  deviceCode    = *data_register;
++
++  return deviceCode;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Sends the data access command to the LCD controller to prepare for one or more
++*  writes or reads using the DMDIF_writeData() and DMDIF_readData()
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMDIF_prepareDataAccess(void)
++{
++  setNextReg(DMD_SSD2119_ACCESS_DATA);
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Writes one pixel to the LCD controller. DMDIF_prepareDataAccess() needs to be
++*  called before writing data using this function.
++*
++*  @param data
++*  The color value of the pixel to be written in 18bpp format
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMDIF_writeData(uint32_t data)
++{
++  *data_register = (data & 0x0000FFFF);
++
++  return DMD_OK;
++}
++
++
++/**************************************************************************//**
++*  @brief
++*  Writes one pixel to the LCD controller. DMDIF_prepareDataAccess() needs to be
++*  called before writing data using this function.
++*
++*  @param data
++*  The color value of the pixel to be written in 18bpp format
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMDIF_writeDataRepeated( uint32_t data, int len ){
++
++   uint16_t pixelData;
++   int i;
++
++   /* Write bits [8:0] of the pixel data to bits [8:0] on the output lines */
++   pixelData = data & 0x0000FFFF;
++
++   for (i=0; i<len; i++) {
++      *data_register = pixelData;
++   }
++
++   return DMD_OK;
++
++}
++
++
++/**************************************************************************//**
++*  @brief
++*  Writes one pixel to the LCD controller. DMDIF_prepareDataAccess() needs to be
++*  called before writing data using this function.
++*
++*  @param a
++*  The upper 9 bits of color value of the pixel to be written in 18bpp format
++*
++*  @param b
++*  The low 9 bits of color value of the pixel to be written in 18bpp format
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMDIF_writeDataConverted( uint16_t a, uint16_t b ){
++
++   uint16_t pixel;
++
++   pixel  = b >> 1;
++   pixel |= (a << 8) & 0xFF00;
++
++   *data_register = pixel;
++
++   return DMD_OK;
++
++}
++
++
++/**************************************************************************//**
++*  @brief
++*  Reads a byte of data from the memory of the LCD controller.
++*  DMDIF_prepareDataAccess() needs to be called before using this function.
++*  DOESN'T WORK
++*
++*  @return
++*  18bpp value of pixel
++******************************************************************************/
++uint32_t DMDIF_readData(void)
++{
++  uint32_t data;
++
++  data = *data_register;
++
++  return data;
++}
++
++/**************************************************************************//**
++*  \brief
++*  Sets the register in the LCD controller to write commands to
++*
++*  \param reg
++*  The next register in the LCD controller to write to
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++static EMSTATUS setNextReg(uint8_t reg)
++{
++  uint16_t data;
++
++  data = reg & 0xff;
++  /* Write the register address to bits [8:1] in the index register */
++  *command_register = data;
++
++  return DMD_OK;
++}
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/dmdif_ssd2119_ebi.h linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmdif_ssd2119_ebi.h
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/dmdif_ssd2119_ebi.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmdif_ssd2119_ebi.h	2013-12-13 10:44:59.614902913 +0100
+@@ -0,0 +1,51 @@
++ /*************************************************************************//**
++ * @file dmd_if_ssd2119_ebi.h
++ * @brief Dot matrix display SSD2119 interface using EBI
++ * @author Energy Micro AS
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
++ ******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************/
++
++#ifndef __DMD_IF_SSD2119_EBI_H_
++#define __DMD_IF_SSD2119_EBI_H_
++
++#include <linux/types.h>
++#include "em_types.h"
++
++/* Module Prototypes */
++EMSTATUS DMDIF_init(uint32_t cmdRegAddr, uint32_t dataRegAddr);
++EMSTATUS DMDIF_writeReg(uint8_t reg, uint16_t data);
++uint16_t DMDIF_readDeviceCode(void);
++EMSTATUS DMDIF_prepareDataAccess(void);
++EMSTATUS DMDIF_writeData(uint32_t data);
++EMSTATUS DMDIF_writeDataRepeated(uint32_t data, int len);
++uint32_t DMDIF_readData(void);
++EMSTATUS DMDIF_delay(uint32_t ms);
++
++#endif
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd_ssd2119_16bit.c linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd_ssd2119_16bit.c
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd_ssd2119_16bit.c	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd_ssd2119_16bit.c	2013-12-13 10:44:59.642902561 +0100
+@@ -0,0 +1,584 @@
++ /*************************************************************************//**
++ * @file dmd_ssd2119.c
++ * @brief Dot matrix display driver for LCD controller SSD2119
++ * @author Energy Micro AS
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
++ ******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************
++ *
++ * Adapted by Asbjørn Djupdal in 2014 for use in Linux FB driver
++ *
++ *****************************************************************************/
++
++#include "dmd.h"
++#include "dmd_ssd2119.h"
++#include "dmd_ssd2119_registers.h"
++#include "dmdif_ssd2119_ebi.h"
++
++/** Dimensions of the display */
++DMD_DisplayGeometry dimensions;
++
++/* Local variables */
++static uint32_t initialized = 0;
++static uint16_t rcDriverOutputControl;
++
++/**************************************************************************//**
++*  @brief
++*  Initializes the LCD display
++*
++*  @param initConfig
++*     Not used in this DMD module.
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMD_init(DMD_InitConfig* initConfig)
++{
++  uint16_t data;
++  (void)   initConfig;  /* Suppress compiler warning. */
++
++  /* Initialize register cache variables */
++  rcDriverOutputControl = 0;
++
++  /* Initialization sequence, see UMSH-8252MD-T page 13 */
++
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_VCOM_OTP_1, 0x0006); */
++  DMDIF_writeReg(DMD_SSD2119_VCOM_OTP_1, 0x0006);
++
++  /* Start oscillation */
++  data = DMD_SSD2119_OSCILLATION_START_OSCEN;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_OSCILLATION_START, data); */
++  DMDIF_writeReg(DMD_SSD2119_OSCILLATION_START, data);
++
++  /* Exit sleep mode */
++  data = 0;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_SLEEP_MODE_1, data); */
++  DMDIF_writeReg(DMD_SSD2119_SLEEP_MODE_1, data);
++
++  /* Display control */
++  data  = DMD_SSD2119_DISPLAY_CONTROL_DTE;
++  data |= DMD_SSD2119_DISPLAY_CONTROL_GON;
++  data |= DMD_SSD2119_DISPLAY_CONTROL_D1;
++  data |= DMD_SSD2119_DISPLAY_CONTROL_D0;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_DISPLAY_CONTROL, data); */
++  DMDIF_writeReg(DMD_SSD2119_DISPLAY_CONTROL, data);
++
++  /* Entry mode */
++  data  = DMD_SSD2119_ENTRY_MODE_DFM_65K << DMD_SSD2119_ENTRY_MODE_DFM_SHIFT;
++  data |= DMD_SSD2119_ENTRY_MODE_DENMODE;
++  data |= DMD_SSD2119_ENTRY_MODE_WMODE;
++  data |= DMD_SSD2119_ENTRY_MODE_NOSYNC;
++  data |= DMD_SSD2119_ENTRY_MODE_TY_TYPE_B << DMD_SSD2119_ENTRY_MODE_TY_SHIFT;
++  data |= DMD_SSD2119_ENTRY_MODE_ID1;
++  data |= DMD_SSD2119_ENTRY_MODE_ID0;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_ENTRY_MODE, data); */
++  DMDIF_writeReg(DMD_SSD2119_ENTRY_MODE, data);
++
++  /* LCD AC control */
++  data  = DMD_SSD2119_LCD_AC_CONTROL_BC;
++  data |= DMD_SSD2119_LCD_AC_CONTROL_EOR;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_LCD_AC_CONTROL, data); */
++  DMDIF_writeReg(DMD_SSD2119_LCD_AC_CONTROL, data);
++
++  /* Power control */
++  data  = 0x06 << DMD_SSD2119_POWER_CONTROL_1_DCT_SHIFT;
++  data |= 0x05 << DMD_SSD2119_POWER_CONTROL_1_BT_SHIFT;
++  data |= 0x03 << DMD_SSD2119_POWER_CONTROL_1_DC_SHIFT;
++  data |= 0x04 << DMD_SSD2119_POWER_CONTROL_1_AP_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_POWER_CONTROL_1, data); */
++  DMDIF_writeReg(DMD_SSD2119_POWER_CONTROL_1, data);
++
++  /* Driver output control */
++  data                  = DMD_SSD2119_DRIVER_OUTPUT_CONTROL_RL;
++  data                 |= DMD_SSD2119_DRIVER_OUTPUT_CONTROL_REV;
++  data                 |= DMD_SSD2119_DRIVER_OUTPUT_CONTROL_GD;
++  data                 |= DMD_SSD2119_DRIVER_OUTPUT_CONTROL_TB;
++  data                 |= (DMD_VERTICAL_SIZE - 1) << DMD_SSD2119_DRIVER_OUTPUT_CONTROL_MUX_SHIFT;
++  rcDriverOutputControl = data;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_DRIVER_OUTPUT_CONTROL, data); */
++  DMDIF_writeReg(DMD_SSD2119_DRIVER_OUTPUT_CONTROL, data);
++
++  /* Power Control */
++  data = 0x05 << DMD_SSD2119_POWER_CONTROL_2_VRC_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_POWER_CONTROL_2, data); */
++  DMDIF_writeReg(DMD_SSD2119_POWER_CONTROL_2, data);
++
++  data = 0x0D << DMD_SSD2119_POWER_CONTROL_3_VRH_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_POWER_CONTROL_3, data); */
++  DMDIF_writeReg(DMD_SSD2119_POWER_CONTROL_3, data);
++
++  data  = DMD_SSD2119_POWER_CONTROL_4_VCOMG;
++  data |= 0x0D << DMD_SSD2119_POWER_CONTROL_4_VDV_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_POWER_CONTROL_4, data); */
++  DMDIF_writeReg(DMD_SSD2119_POWER_CONTROL_4, data);
++
++  data  = DMD_SSD2119_POWER_CONTROL_5_NOTP;
++  data |= 0x3E << DMD_SSD2119_POWER_CONTROL_5_VCM_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_POWER_CONTROL_5, data); */
++  DMDIF_writeReg(DMD_SSD2119_POWER_CONTROL_5, data);
++
++  data = 0x0058;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GENERIC_INTERFACE_CONTROL, data); */
++  DMDIF_writeReg(DMD_SSD2119_GENERIC_INTERFACE_CONTROL, data);
++
++  /* Gamma settings */
++  data  = 0x00 << DMD_SSD2119_GAMMA_1_PKP1_SHIFT;
++  data |= 0x00 << DMD_SSD2119_GAMMA_1_PKP0_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_1, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_1, data);
++
++  data  = 0x01 << DMD_SSD2119_GAMMA_2_PKP3_SHIFT;
++  data |= 0x01 << DMD_SSD2119_GAMMA_2_PKP2_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_2, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_2, data);
++
++  data  = 0x01 << DMD_SSD2119_GAMMA_3_PKP5_SHIFT;
++  data |= 0x00 << DMD_SSD2119_GAMMA_3_PKP4_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_3, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_3, data);
++
++  data  = 0x03 << DMD_SSD2119_GAMMA_4_PRP1_SHIFT;
++  data |= 0x05 << DMD_SSD2119_GAMMA_4_PRP0_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_4, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_4, data);
++
++  data  = 0x07 << DMD_SSD2119_GAMMA_5_PKN1_SHIFT;
++  data |= 0x07 << DMD_SSD2119_GAMMA_5_PKN0_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_5, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_5, data);
++
++  data  = 0x03 << DMD_SSD2119_GAMMA_6_PKN3_SHIFT;
++  data |= 0x05 << DMD_SSD2119_GAMMA_6_PKN2_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_6, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_6, data);
++
++  data  = 0x07 << DMD_SSD2119_GAMMA_7_PKN5_SHIFT;
++  data |= 0x07 << DMD_SSD2119_GAMMA_7_PKN4_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_7, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_7, data);
++
++  data  = 0x02 << DMD_SSD2119_GAMMA_8_PRN1_SHIFT;
++  data |= 0x01 << DMD_SSD2119_GAMMA_8_PRN0_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_8, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_8, data);
++
++  data  = 0x12 << DMD_SSD2119_GAMMA_9_VRP1_SHIFT;
++  data |= 0x00 << DMD_SSD2119_GAMMA_9_VRP0_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_9, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_9, data);
++
++  data  = 0x09 << DMD_SSD2119_GAMMA_10_VRN1_SHIFT;
++  data |= 0x00 << DMD_SSD2119_GAMMA_10_VRN0_SHIFT;
++  /*  printf("R%x: 0x%x\n", DMD_SSD2119_GAMMA_10, data); */
++  DMDIF_writeReg(DMD_SSD2119_GAMMA_10, data);
++
++  /* Set up dimensions of the display */
++  dimensions.xSize = DMD_HORIZONTAL_SIZE;
++  dimensions.ySize = DMD_VERTICAL_SIZE;
++
++  /* At initialization, the clip is the entire display */
++  dimensions.xClipStart = 0;
++  dimensions.yClipStart = 0;
++  dimensions.clipWidth  = dimensions.xSize;
++  dimensions.clipHeight = dimensions.ySize;
++
++  initialized = 1;
++
++  /* Fill the entire display with black color */
++  DMD_writeColor(0, 0, 0, dimensions.xSize * dimensions.ySize);
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  \brief
++*  Get the dimensions of the display and of the current clipping area
++*
++*  \return
++*  DMD_Dimensions structure containing the size of the display and the
++*  clipping area
++******************************************************************************/
++EMSTATUS DMD_getDisplayGeometry(DMD_DisplayGeometry **geometry)
++{
++  if (!initialized)
++  {
++    return DMD_ERROR_DRIVER_NOT_INITIALIZED;
++  }
++  *geometry = &dimensions;
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Sets the clipping area. All coordinates given to writeData/writeColor/readData
++*  are relative to this clipping area.
++*
++*  @param xStart
++*  X coordinate of the upper left corner of the clipping area
++*  @param yStart
++*  Y coordinate of the upper left corner of the clipping area
++*  @param width
++*  Width of the clipping area
++*  @param height
++*  Height of the clipping area
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMD_setClippingArea(uint16_t xStart, uint16_t yStart,
++                             uint16_t width, uint16_t height)
++{
++  uint16_t verticalPos;
++  uint16_t xEnd;
++  uint16_t yEnd;
++
++  if (!initialized)
++  {
++    return DMD_ERROR_DRIVER_NOT_INITIALIZED;
++  }
++
++  /* Check parameters */
++  if (xStart + width > dimensions.xSize ||
++      yStart + height > dimensions.ySize)
++  {
++    return DMD_ERROR_PIXEL_OUT_OF_BOUNDS;
++  }
++
++  if (width == 0 || height == 0)
++  {
++    return DMD_ERROR_EMPTY_CLIPPING_AREA;
++  }
++
++  xEnd = xStart + width - 1;
++  yEnd = yStart + height - 1;
++
++  /* Set the clipping region in the display */
++  DMDIF_writeReg(DMD_SSD2119_HORIZONTAL_RAM_ADDRESS_START_POS, xStart);
++  DMDIF_writeReg(DMD_SSD2119_HORIZONTAL_RAM_ADDRESS_END_POS, xEnd);
++
++  verticalPos  = yEnd << DMD_SSD2119_VERTICAL_RAM_ADDRESS_POS_END_SHIFT;
++  verticalPos |= yStart << DMD_SSD2119_VERTICAL_RAM_ADDRESS_POS_START_SHIFT;
++  DMDIF_writeReg(DMD_SSD2119_VERTICAL_RAM_ADDRESS_POS, verticalPos);
++
++  /* Update the dimensions structure */
++  dimensions.xClipStart = xStart;
++  dimensions.yClipStart = yStart;
++  dimensions.clipWidth  = width;
++  dimensions.clipHeight = height;
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Set the x and y coordinate of the next pixel to draw
++*
++*  @param x
++*  X address of the pixel, relative to the current clipping area
++*  @param y
++*  Y address of the pixel, relative to the current clipping area
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS setPixelAddress(uint16_t x, uint16_t y)
++{
++  /* Check parameters */
++  if (x > dimensions.clipWidth || y > dimensions.clipHeight)
++  {
++    return DMD_ERROR_PIXEL_OUT_OF_BOUNDS;
++  }
++
++  /* Set pixel position */
++  DMDIF_writeReg(DMD_SSD2119_SET_X_ADDRESS_COUNTER,
++                 x + dimensions.xClipStart);
++  DMDIF_writeReg(DMD_SSD2119_SET_Y_ADDRESS_COUNTER,
++                 y + dimensions.yClipStart);
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Draws pixels to the display
++*
++*  @param x
++*  X coordinate of the first pixel to be written, relative to the clipping area
++*  @param y
++*  Y coordinate of the first pixel to be written, relative to the clipping area
++*  @param data
++*  Array containing the pixel data. Each 8-bit element in the array are one color
++*  component of the pixel, so that 3 bytes represent one pixel. The pixels are
++*  ordered by increasing x coordinate, after the last pixel of a row, the next
++*  pixel will be the first pixel on the next row.
++*  @param numPixels
++*  Number of pixels to be written
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMD_writeData(uint16_t x, uint16_t y, const uint8_t data[],
++                       uint32_t numPixels)
++{
++  uint32_t statusCode;
++  uint32_t clipRemaining;
++  uint32_t color;
++  uint32_t i;
++
++  if (!initialized)
++  {
++    return DMD_ERROR_DRIVER_NOT_INITIALIZED;
++  }
++
++  /* Set the address of the first pixel */
++  statusCode = setPixelAddress(x, y);
++  if (statusCode != DMD_OK)
++  {
++    return statusCode;
++  }
++
++  /* Number of pixels from the first pixel (given by x and y) to the end
++   * of the clipping area */
++  clipRemaining = (dimensions.clipHeight - y - 1) * dimensions.clipWidth +
++                  dimensions.clipWidth - x;
++
++  /* Check that the length of data isn't longer than the number of pixels
++   * in the rest of the clipping area */
++  if (numPixels > clipRemaining)
++  {
++    return DMD_ERROR_TOO_MUCH_DATA;
++  }
++
++  /* Write data */
++  DMDIF_prepareDataAccess( );
++  for (i = 0; i < numPixels; i++)
++  {
++    color = (data[2 * i + 1] << 8) | (data[2 * i]);
++
++    DMDIF_writeData(color);
++  }
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Blit clip area from framebuffer to the display
++*
++*  @param fb
++*  Pointer to framebuffer
++*  
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMD_blitFB(const uint16_t fb[])
++{
++  uint32_t statusCode;
++  uint32_t color;
++  int x, y;
++  const uint16_t *p;
++  int xStop = dimensions.xClipStart + dimensions.clipWidth;
++  int yStop = dimensions.yClipStart + dimensions.clipHeight;
++
++  if (!initialized)
++  {
++    return DMD_ERROR_DRIVER_NOT_INITIALIZED;
++  }
++
++  /* Set the address of the first pixel */
++  statusCode = setPixelAddress(0, 0);
++  if (statusCode != DMD_OK)
++  {
++    return statusCode;
++  }
++
++  /* Write data */
++  DMDIF_prepareDataAccess();
++
++  p = fb + dimensions.yClipStart * DMD_HORIZONTAL_SIZE + dimensions.xClipStart;
++
++  for(y = dimensions.yClipStart; y < yStop; y++) {
++    for(x = dimensions.xClipStart; x < xStop; x++) {
++      color = *p++;
++      DMDIF_writeData(color);
++    }
++    p = fb + y * DMD_HORIZONTAL_SIZE + dimensions.xClipStart;
++  }
++
++  return DMD_OK;
++}
++
++/**************************************************************************//**
++*  \brief
++*  Draws a number of pixels of the same color to the display
++*
++*  @param x
++*  X coordinate of the first pixel to be written, relative to the clipping area
++*  @param y
++*  Y coordinate of the first pixel to be written, relative to the clipping area
++*  @param color
++*  Color to write
++*  @param numPixels
++*  Number of pixels to be written
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMD_writeColor(uint16_t x, uint16_t y, uint16_t color,
++                        uint32_t numPixels)
++{
++
++   uint32_t clipRemaining;
++   uint32_t statusCode;
++
++   if (!initialized){
++      return DMD_ERROR_DRIVER_NOT_INITIALIZED;
++   }
++
++   /* Set the address of the first pixel */
++   statusCode = setPixelAddress(x, y);
++   if (statusCode != DMD_OK){
++      return statusCode;
++   }
++
++   /* Number of pixels from the first pixel (given by x and y) to the end
++    * of the clipping area */
++   clipRemaining = (dimensions.clipHeight - y - 1) * dimensions.clipWidth +
++      dimensions.clipWidth - x;
++
++   /* Check that the length of data isn't longer than the number of pixels
++    * in the rest of the clipping area */
++   if (numPixels > clipRemaining){
++      return DMD_ERROR_TOO_MUCH_DATA;
++   }
++
++   /* Write data */
++   DMDIF_prepareDataAccess( );
++
++   DMDIF_writeDataRepeated(color, numPixels);
++
++   return DMD_OK;
++
++}
++
++/**************************************************************************//**
++*  @brief
++*  Turns off the display and puts it into sleep mode
++*  Does not turn off backlight
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMD_sleep(void){
++
++   uint16_t data;
++
++   if (!initialized){
++      return DMD_ERROR_DRIVER_NOT_INITIALIZED;
++   }
++
++   /* Put into sleep mode */
++   data = DMD_SSD2119_SLEEP_MODE_1_SLP;
++   DMDIF_writeReg(DMD_SSD2119_SLEEP_MODE_1, data);
++
++   /* Turn off display */
++   data = 0;
++   DMDIF_writeReg(DMD_SSD2119_DISPLAY_CONTROL, 0x0000);
++
++   /* Delay 1.5 frame */
++   /*DMDIF_delay((1000 / DMD_FRAME_FREQUENCY) * 3 / 2);*/
++
++   return DMD_OK;
++}
++
++/**************************************************************************//**
++*  @brief
++*  Wakes up the display from sleep mode
++*
++*  @return
++*  DMD_OK on success, otherwise error code
++******************************************************************************/
++EMSTATUS DMD_wakeUp(void){
++
++   uint16_t data;
++
++   if (!initialized){
++      return DMD_ERROR_DRIVER_NOT_INITIALIZED;
++   }
++
++   /* Get out of sleep mode */
++   data = 0;
++   DMDIF_writeReg(DMD_SSD2119_SLEEP_MODE_1, data);
++
++   /* Turn on display */
++   data  = DMD_SSD2119_DISPLAY_CONTROL_DTE;
++   data |= DMD_SSD2119_DISPLAY_CONTROL_GON;
++   data |= DMD_SSD2119_DISPLAY_CONTROL_D1;
++   data |= DMD_SSD2119_DISPLAY_CONTROL_D0;
++   DMDIF_writeReg(DMD_SSD2119_DISPLAY_CONTROL, 0x0033);
++
++   /* Delay 10 frames */
++   /*DMDIF_delay((1000 / DMD_FRAME_FREQUENCY) * 10);*/
++
++   return DMD_OK;
++
++}
++
++/**************************************************************************//**
++*  @brief
++*  Set horizontal and vertical flip mode of display controller
++*
++*  @param hor
++*  Set to flip display horizontally
++*
++*  @param ver
++*  Set to flip display vertically
++*
++*  @return
++*  Returns DMD_OK is successful, error otherwise.
++******************************************************************************/
++EMSTATUS DMD_flipDisplay(int horizontal, int vertical){
++
++  uint16_t reg;
++
++  reg = rcDriverOutputControl;
++
++  if (horizontal) reg &= ~DMD_SSD2119_DRIVER_OUTPUT_CONTROL_RL;
++  else reg |= DMD_SSD2119_DRIVER_OUTPUT_CONTROL_RL;
++
++  if (vertical) reg &= ~DMD_SSD2119_DRIVER_OUTPUT_CONTROL_TB;
++  else reg |= DMD_SSD2119_DRIVER_OUTPUT_CONTROL_TB;
++
++  rcDriverOutputControl = reg;
++  DMDIF_writeReg(DMD_SSD2119_DRIVER_OUTPUT_CONTROL, rcDriverOutputControl);
++
++  return DMD_OK;
++
++}
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd_ssd2119.h linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd_ssd2119.h
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd_ssd2119.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd_ssd2119.h	2013-12-13 10:44:59.594903164 +0100
+@@ -0,0 +1,50 @@
++ /*************************************************************************//**
++ * @file dmd_ssd2119.h
++ * @brief Dot matrix display driver for LCD controller SSD2119
++ * @author Energy Micro AS
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
++ ******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************/
++
++#ifndef __DMD_SSD2119_H
++#define __DMD_SSD2119_H
++
++#include <linux/types.h>
++#include "dmd.h"
++
++/** Frame update frequency of display */
++#define DMD_FRAME_FREQUENCY    80
++/** Horizontal size of the display */
++#define DMD_HORIZONTAL_SIZE    320
++/** Vertical size of the display */
++#define DMD_VERTICAL_SIZE      240
++
++EMSTATUS DMDIF_init(uint32_t cmdRegAddr, uint32_t dataRegAddr);
++
++#endif
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd_ssd2119_registers.h linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd_ssd2119_registers.h
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/dmd_ssd2119_registers.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/dmd_ssd2119_registers.h	2013-12-13 10:44:59.626902762 +0100
+@@ -0,0 +1,203 @@
++ /*************************************************************************//**
++ * @file dmd_ssd2119.h
++ * @brief Register definitions for LCD controller SSD2119
++ * @author Energy Micro AS
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
++ ******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************/
++
++#ifndef __DMD_SSD2119_REGISTERS_H_
++#define __DMD_SSD2119_REGISTERS_H_
++
++#define DMD_SSD2119_DEVICE_CODE_READ                        0x00
++#define DMD_SSD2119_OSCILLATION_START                       0x00
++#define DMD_SSD2119_OSCILLATION_START_OSCEN                 0x0001
++
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL                   0x01
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL_RL                0x4000
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL_REV               0x2000
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL_GD                0x1000
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL_BGR               0x0800
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL_SM                0x0400
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL_TB                0x0200
++#define DMD_SSD2119_DRIVER_OUTPUT_CONTROL_MUX_SHIFT         0
++
++#define DMD_SSD2119_LCD_AC_CONTROL                          0x02
++#define DMD_SSD2119_LCD_AC_CONTROL_FLC                      0x1000
++#define DMD_SSD2119_LCD_AC_CONTROL_ENWS                     0x0800
++#define DMD_SSD2119_LCD_AC_CONTROL_BC                       0x0400
++#define DMD_SSD2119_LCD_AC_CONTROL_EOR                      0x0200
++#define DMD_SSD2119_LCD_AC_CONTROL_WSMD                     0x0100
++#define DMD_SSD2119_LCD_AC_CONTROL_NW_SHIFT                 0
++
++#define DMD_SSD2119_POWER_CONTROL_1                         0x03
++#define DMD_SSD2119_POWER_CONTROL_1_DCT_SHIFT               12
++#define DMD_SSD2119_POWER_CONTROL_1_BT_SHIFT                9
++#define DMD_SSD2119_POWER_CONTROL_1_DC_SHIFT                4
++#define DMD_SSD2119_POWER_CONTROL_1_AP_SHIFT                1
++
++#define DMD_SSD2119_DISPLAY_CONTROL                         0x07
++#define DMD_SSD2119_DISPLAY_CONTROL_PT1                     0x1000
++#define DMD_SSD2119_DISPLAY_CONTROL_PT0                     0x0800
++#define DMD_SSD2119_DISPLAY_CONTROL_VLE2                    0x0400
++#define DMD_SSD2119_DISPLAY_CONTROL_VLE1                    0x0200
++#define DMD_SSD2119_DISPLAY_CONTROL_SPT                     0x0100
++#define DMD_SSD2119_DISPLAY_CONTROL_GON                     0x0020
++#define DMD_SSD2119_DISPLAY_CONTROL_DTE                     0x0010
++#define DMD_SSD2119_DISPLAY_CONTROL_CM                      0x0008
++#define DMD_SSD2119_DISPLAY_CONTROL_D1                      0x0002
++#define DMD_SSD2119_DISPLAY_CONTROL_D0                      0x0001
++
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL                     0x0B
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_NO_SHIFT            14
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_SDT_SHIFT           12
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_EQ_SHIFT            8
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_DIV_SHIFT           6
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_DIV_1               0x0
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_DIV_2               0x1
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_DIV_4               0x2
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_DIV_8               0x3
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_SDIV                0x0020
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_SRTN                0x0010
++#define DMD_SSD2119_FRAME_CYCLE_CONTROL_RTN_SHIFT           0
++
++#define DMD_SSD2119_POWER_CONTROL_2                         0x0C
++#define DMD_SSD2119_POWER_CONTROL_2_VRC_SHIFT               0
++
++#define DMD_SSD2119_POWER_CONTROL_3                         0x0D
++#define DMD_SSD2119_POWER_CONTROL_3_VRH_SHIFT               0
++
++#define DMD_SSD2119_POWER_CONTROL_4                         0x0E
++#define DMD_SSD2119_POWER_CONTROL_4_VCOMG                   0x2000
++#define DMD_SSD2119_POWER_CONTROL_4_VDV_SHIFT               8
++
++#define DMD_SSD2119_GATE_SCAN_START_POSITION                0x0F
++
++#define DMD_SSD2119_SLEEP_MODE_1                            0x10
++#define DMD_SSD2119_SLEEP_MODE_1_SLP                        0x0001
++
++#define DMD_SSD2119_ENTRY_MODE                              0x11
++#define DMD_SSD2119_ENTRY_MODE_VSMODE                       0x8000
++#define DMD_SSD2119_ENTRY_MODE_DFM_SHIFT                    13
++#define DMD_SSD2119_ENTRY_MODE_DFM_65K                      0x3
++#define DMD_SSD2119_ENTRY_MODE_DFM_262K                     0x2
++#define DMD_SSD2119_ENTRY_MODE_DENMODE                      0x0800
++#define DMD_SSD2119_ENTRY_MODE_WMODE                        0x0400
++#define DMD_SSD2119_ENTRY_MODE_NOSYNC                       0x0200
++#define DMD_SSD2119_ENTRY_MODE_DMODE                        0x0100
++#define DMD_SSD2119_ENTRY_MODE_TY_SHIFT                     6
++#define DMD_SSD2119_ENTRY_MODE_TY_TYPE_A                    0x0
++#define DMD_SSD2119_ENTRY_MODE_TY_TYPE_B                    0x1
++#define DMD_SSD2119_ENTRY_MODE_TY_TYPE_C                    0x2
++#define DMD_SSD2119_ENTRY_MODE_ID1                          0x0020
++#define DMD_SSD2119_ENTRY_MODE_ID0                          0x0010
++#define DMD_SSD2119_ENTRY_MODE_AM                           0x0008
++
++#define DMD_SSD2119_SLEEP_MODE_2                            0x12
++#define DMD_SSD2119_SLEEP_MODE_2_DSLP                       0x2000
++#define DMD_SSD2119_SLEEP_MODE_2_HVCI                       0x4000
++
++#define DMD_SSD2119_GENERIC_INTERFACE_CONTROL               0x15
++#define DMD_SSD2119_GENERIC_INTERFACE_CONTROL_INVDOT        0x0008
++#define DMD_SSD2119_GENERIC_INTERFACE_CONTROL_INVDEN        0x0004
++#define DMD_SSD2119_GENERIC_INTERFACE_CONTROL_INVHS         0x0002
++#define DMD_SSD2119_GENERIC_INTERFACE_CONTROL_INVVS         0x0001
++
++#define DMD_SSD2119_POWER_CONTROL_5                         0x1E
++#define DMD_SSD2119_POWER_CONTROL_5_NOTP                    0x0080
++#define DMD_SSD2119_POWER_CONTROL_5_VCM_SHIFT               0
++
++#define DMD_SSD2119_ACCESS_DATA                             0x22
++
++#define DMD_SSD2119_FRAME_FREQUENCY_CONTROL                 0x25
++#define DMD_SSD2119_FRAME_FREQUENCY_CONTROL_OSC_SHIFT       12
++
++#define DMD_SSD2119_VCOM_OTP_1                              0x28
++#define DMD_SSD2119_VCOM_OTP_2                              0x29
++
++#define DMD_SSD2119_GAMMA_1                                 0x30
++#define DMD_SSD2119_GAMMA_1_PKP1_SHIFT                      8
++#define DMD_SSD2119_GAMMA_1_PKP0_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_2                                 0x31
++#define DMD_SSD2119_GAMMA_2_PKP3_SHIFT                      8
++#define DMD_SSD2119_GAMMA_2_PKP2_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_3                                 0x32
++#define DMD_SSD2119_GAMMA_3_PKP5_SHIFT                      8
++#define DMD_SSD2119_GAMMA_3_PKP4_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_4                                 0x33
++#define DMD_SSD2119_GAMMA_4_PRP1_SHIFT                      8
++#define DMD_SSD2119_GAMMA_4_PRP0_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_5                                 0x34
++#define DMD_SSD2119_GAMMA_5_PKN1_SHIFT                      8
++#define DMD_SSD2119_GAMMA_5_PKN0_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_6                                 0x35
++#define DMD_SSD2119_GAMMA_6_PKN3_SHIFT                      8
++#define DMD_SSD2119_GAMMA_6_PKN2_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_7                                 0x36
++#define DMD_SSD2119_GAMMA_7_PKN5_SHIFT                      8
++#define DMD_SSD2119_GAMMA_7_PKN4_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_8                                 0x37
++#define DMD_SSD2119_GAMMA_8_PRN1_SHIFT                      8
++#define DMD_SSD2119_GAMMA_8_PRN0_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_9                                 0x3A
++#define DMD_SSD2119_GAMMA_9_VRP1_SHIFT                      8
++#define DMD_SSD2119_GAMMA_9_VRP0_SHIFT                      0
++
++#define DMD_SSD2119_GAMMA_10                                0x3B
++#define DMD_SSD2119_GAMMA_10_VRN1_SHIFT                     8
++#define DMD_SSD2119_GAMMA_10_VRN0_SHIFT                     0
++
++#define DMD_SSD2119_VERTICAL_SCROLL_CONTROL_1               0x41
++#define DMD_SSD2119_VERTICAL_SCROLL_CONTROL_2               0x42
++
++#define DMD_SSD2119_VERTICAL_RAM_ADDRESS_POS                0x44
++#define DMD_SSD2119_VERTICAL_RAM_ADDRESS_POS_END_SHIFT      8
++#define DMD_SSD2119_VERTICAL_RAM_ADDRESS_POS_START_SHIFT    0
++
++#define DMD_SSD2119_HORIZONTAL_RAM_ADDRESS_START_POS        0x45
++#define DMD_SSD2119_HORIZONTAL_RAM_ADDRESS_END_POS          0x46
++
++#define DMD_SSD2119_FIRST_WINDOW_START                      0x48
++#define DMD_SSD2119_FIRST_WINDOW_END                        0x49
++
++#define DMD_SSD2119_SECOND_WINDOW_START                     0x4A
++#define DMD_SSD2119_SECOND_WINDOW_END                       0x4B
++
++#define DMD_SSD2119_SET_X_ADDRESS_COUNTER                   0x4E
++#define DMD_SSD2119_SET_Y_ADDRESS_COUNTER                   0x4F
++
++#endif
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/em_types.h linux-3.12-rc4_diff/drivers/video/dk3750_fb/em_types.h
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/em_types.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/em_types.h	2013-12-13 10:44:59.594903164 +0100
+@@ -0,0 +1,43 @@
++/**************************************************************************//**
++ * @file
++ * @brief Definition of EMSTATUS used by graphics library
++ * @author Energy Micro AS
++ * @version 2.0.1
++ ******************************************************************************
++ * @section License
++ * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
++ *******************************************************************************
++ *
++ * Permission is granted to anyone to use this software for any purpose,
++ * including commercial applications, and to alter it and redistribute it
++ * freely, subject to the following restrictions:
++ *
++ * 1. The origin of this software must not be misrepresented; you must not
++ *    claim that you wrote the original software.
++ * 2. Altered source versions must be plainly marked as such, and must not be
++ *    misrepresented as being the original software.
++ * 3. This notice may not be removed or altered from any source distribution.
++ * 4. The source and compiled code may only be used on Energy Micro "EFM32"
++ *    microcontrollers and "EFR4" radios.
++ *
++ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
++ * obligation to support this Software. Energy Micro AS is providing the
++ * Software "AS IS", with no express or implied warranties of any kind,
++ * including, but not limited to, any implied warranties of merchantability
++ * or fitness for any particular purpose or warranties against infringement
++ * of any proprietary rights of a third party.
++ *
++ * Energy Micro AS will not be liable for any consequential, incidental, or
++ * special damages, or any other relief, or for any claim by any third party,
++ * arising from your use of this Software.
++ *
++ *****************************************************************************/
++
++#ifndef __EM_TYPES_H_
++#define __EM_TYPES_H_
++
++#include <linux/types.h>
++
++typedef uint32_t   EMSTATUS;
++
++#endif
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/io.h linux-3.12-rc4_diff/drivers/video/dk3750_fb/io.h
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/io.h	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/io.h	2013-12-13 10:44:59.626902762 +0100
+@@ -0,0 +1,10 @@
++#ifndef IO_H
++#define IO_H
++
++#include "bsp_dk_bcreg_3201.h"
++
++#define UIF_AEM  ((volatile uint16_t*)(BC_REGISTER_BASE + 0x0e))
++#define ARB_CTRL ((volatile uint16_t*)(BC_REGISTER_BASE + 0x16))
++#define DISPLAY_CTRL ((volatile uint16_t*)(BC_REGISTER_BASE + 0x12))
++
++#endif
+diff -rupN linux-3.12-rc4_original/drivers/video/dk3750_fb/Makefile linux-3.12-rc4_diff/drivers/video/dk3750_fb/Makefile
+--- linux-3.12-rc4_original/drivers/video/dk3750_fb/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ linux-3.12-rc4_diff/drivers/video/dk3750_fb/Makefile	2013-12-13 10:44:59.626902762 +0100
+@@ -0,0 +1,5 @@
++obj-$(CONFIG_FB_DK3750) += dk3750_fb.o
++
++CFLAGS_dmd_ssd2119_16bit.o := -O3
++
++dk3750_fb-objs := dk3750_fb_mod.o dmd_ssd2119_16bit.o dmdif_ssd2119_ebi16.o
+diff -rupN linux-3.12-rc4_original/drivers/video/Kconfig linux-3.12-rc4_diff/drivers/video/Kconfig
+--- linux-3.12-rc4_original/drivers/video/Kconfig	2013-10-06 23:00:20.000000000 +0200
++++ linux-3.12-rc4_diff/drivers/video/Kconfig	2013-12-13 10:45:39.090406638 +0100
+@@ -1456,6 +1456,18 @@ config FB_ATY_BACKLIGHT
+ 	help
+ 	  Say Y here if you want to control the backlight of your display.
+ 
++config FB_DK3750
++	tristate "EFM32GG DK3750 framebuffer support"
++	depends on FB && ARCH_EFM32
++	select FB_CFB_FILLRECT
++	select FB_CFB_COPYAREA
++	select FB_CFB_IMAGEBLIT
++	help
++	  This is a driver for the TFT on the EFM32GG DK3750 development board. 
++
++	  To compile this driver as a module, choose M here: the
++	  module will be called dk3750_fb.
++
+ config FB_S3
+ 	tristate "S3 Trio/Virge support"
+ 	depends on FB && PCI
+diff -rupN linux-3.12-rc4_original/drivers/video/Makefile linux-3.12-rc4_diff/drivers/video/Makefile
+--- linux-3.12-rc4_original/drivers/video/Makefile	2013-10-06 23:00:20.000000000 +0200
++++ linux-3.12-rc4_diff/drivers/video/Makefile	2013-12-13 10:45:49.302278258 +0100
+@@ -47,6 +47,7 @@ obj-$(CONFIG_FB_NVIDIA)		  += nvidia/
+ obj-$(CONFIG_FB_ATY)		  += aty/ macmodes.o
+ obj-$(CONFIG_FB_ATY128)		  += aty/ macmodes.o
+ obj-$(CONFIG_FB_RADEON)		  += aty/
++obj-$(CONFIG_FB_DK3750)		  += dk3750_fb/
+ obj-$(CONFIG_FB_SIS)		  += sis/
+ obj-$(CONFIG_FB_VIA)		  += via/
+ obj-$(CONFIG_FB_KYRO)             += kyro/

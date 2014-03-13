@@ -1,0 +1,375 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Thu, 9 Feb 2012 22:35:24 +0100
+Subject: [PATCH] hwmon/efm32-adc: new driver
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ drivers/hwmon/Kconfig     |  10 ++
+ drivers/hwmon/Makefile    |   1 +
+ drivers/hwmon/efm32-adc.c | 321 ++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 332 insertions(+)
+ create mode 100644 drivers/hwmon/efm32-adc.c
+
+diff --git a/drivers/hwmon/Kconfig b/drivers/hwmon/Kconfig
+index b3ab9d4..3788c4b 100644
+--- a/drivers/hwmon/Kconfig
++++ b/drivers/hwmon/Kconfig
+@@ -382,6 +382,16 @@ config SENSORS_DA9055
+ 	  This driver can also be built as a module.  If so, the module
+ 	  will be called da9055-hwmon.
+ 
++config SENSORS_EFM32_ADC
++	tristate "Energy Micro EFM32 ADC"
++	depends on OF && ARM && (ARCH_EFM32 || COMPILE_TEST)
++	help
++	  If you say yes here you get support for Energy Micro's ADC
++	  build into their EFM32 SoCs
++
++	  This driver can also be built as a module. If so, the module
++	  will be called efm32-adc.
++
+ config SENSORS_I5K_AMB
+ 	tristate "FB-DIMM AMB temperature sensor on Intel 5000 series chipsets"
+ 	depends on PCI
+diff --git a/drivers/hwmon/Makefile b/drivers/hwmon/Makefile
+index ec7cde0..442f586 100644
+--- a/drivers/hwmon/Makefile
++++ b/drivers/hwmon/Makefile
+@@ -51,6 +51,7 @@ obj-$(CONFIG_SENSORS_DA9055)+= da9055-hwmon.o
+ obj-$(CONFIG_SENSORS_DME1737)	+= dme1737.o
+ obj-$(CONFIG_SENSORS_DS620)	+= ds620.o
+ obj-$(CONFIG_SENSORS_DS1621)	+= ds1621.o
++obj-$(CONFIG_SENSORS_EFM32_ADC)	+= efm32-adc.o
+ obj-$(CONFIG_SENSORS_EMC1403)	+= emc1403.o
+ obj-$(CONFIG_SENSORS_EMC2103)	+= emc2103.o
+ obj-$(CONFIG_SENSORS_EMC6W201)	+= emc6w201.o
+diff --git a/drivers/hwmon/efm32-adc.c b/drivers/hwmon/efm32-adc.c
+new file mode 100644
+index 0000000..fa4bd21
+--- /dev/null
++++ b/drivers/hwmon/efm32-adc.c
+@@ -0,0 +1,321 @@
++#define DEBUG
++/*
++ * Energy Micro EFM32 adc
++ *
++ * Copyright (C) 2012 Uwe Kleine-Koenig for Pengutronix
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++#include <linux/platform_device.h>
++#include <linux/hwmon-sysfs.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/hwmon.h>
++#include <linux/io.h>
++#include <linux/slab.h>
++#include <linux/interrupt.h>
++#include <linux/clk.h>
++#include <linux/init.h>
++#include <linux/err.h>
++
++#define DRIVER_NAME "efm32-adc"
++
++#define ADC_CTRL		0x000
++
++#define ADC_CMD			0x004
++#define ADC_CMD_SINGLESTART		0x00000001
++#define ADC_CMD_SINGLESTOP		0x00000002
++#define ADC_CMD_SCANSTART		0x00000004
++#define ADC_CMD_SCANSTOP		0x00000008
++
++#define ADC_STATUS		0x008
++#define ADC_STATUS_SINGLEDV		0x00010000
++#define ADC_SINGLECTRL		0x00c
++#define ADC_SINGLEDATA		0x024
++
++#define ADC_IEN			0x014
++#define ADC_IF			0x018
++#define ADC_IFC			0x020
++#define ADC_IF_SINGLE			0x00000001
++
++struct efm32_adc_ddata {
++	struct device *hwmondev;
++	void __iomem *base;
++	struct clk *clk;
++	unsigned int irq;
++	spinlock_t lock;
++	unsigned int busy;
++};
++
++static void efm32_adc_write32(struct efm32_adc_ddata *ddata,
++		u32 value, unsigned offset)
++{
++	writel_relaxed(value, ddata->base + offset);
++}
++
++static u32 efm32_adc_read32(struct efm32_adc_ddata *ddata, unsigned offset)
++{
++	return readl_relaxed(ddata->base + offset);
++}
++
++static ssize_t efm32_adc_show_name(struct device *dev,
++		struct device_attribute *devattr, char *buf)
++{
++	return sprintf(buf, "efm32\n");
++}
++
++struct efm32_adc_irqdata {
++	struct efm32_adc_ddata *ddata;
++	struct completion done;
++};
++
++static irqreturn_t efm32_adc_irq(int irq, void *data)
++{
++	struct efm32_adc_irqdata *irqdata = data;
++	u32 iflag = efm32_adc_read32(irqdata->ddata, ADC_IF);
++
++	if (iflag & ADC_IF_SINGLE) {
++		efm32_adc_write32(irqdata->ddata, ADC_IF_SINGLE, ADC_IFC);
++		complete(&irqdata->done);
++		return IRQ_HANDLED;
++	}
++
++	return IRQ_NONE;
++}
++
++static int efm32_adc_read_single(struct device *dev,
++		struct device_attribute *devattr, unsigned int *val)
++{
++	struct platform_device *pdev = to_platform_device(dev);
++	struct efm32_adc_ddata *ddata = platform_get_drvdata(pdev);
++	int ret;
++	struct efm32_adc_irqdata irqdata = { .ddata = ddata, };
++	u32 status;
++	unsigned long freq;
++
++	ret = clk_prepare(ddata->clk);
++	if (ret < 0) {
++		dev_dbg(ddata->hwmondev, "failed to enable clk (%d)\n", ret);
++		return ret;
++	}
++
++	spin_lock_irq(&ddata->lock);
++	if (ddata->busy) {
++		dev_dbg(ddata->hwmondev, "busy\n");
++		ret = -EBUSY;
++		goto out_unlock;
++	}
++
++	init_completion(&irqdata.done);
++
++	ret = clk_enable(ddata->clk);
++	if (ret < 0) {
++		dev_dbg(ddata->hwmondev, "failed to enable clk (%d)\n", ret);
++		goto out_unlock;
++	}
++	freq = clk_get_rate(ddata->clk);
++
++	efm32_adc_write32(ddata,
++			ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP, ADC_CMD);
++	efm32_adc_write32(ddata, ((freq - 1) / 1000000) << 16 |
++			((freq / 400000) - 1) << 8, ADC_CTRL);
++	efm32_adc_write32(ddata, 0x800, ADC_SINGLECTRL);
++	efm32_adc_write32(ddata, ADC_IF_SINGLE, ADC_IFC);
++	efm32_adc_write32(ddata, ADC_CMD_SINGLESTART, ADC_CMD);
++
++	ret = request_irq(ddata->irq, efm32_adc_irq, 0, DRIVER_NAME, &irqdata);
++	if (ret) {
++		efm32_adc_write32(ddata, ADC_CMD_SINGLESTOP, ADC_CMD);
++		goto out_clkoff;
++	}
++
++	efm32_adc_write32(ddata, ADC_IF_SINGLE, ADC_IEN);
++
++	ddata->busy = 1;
++
++	spin_unlock_irq(&ddata->lock);
++
++	ret = wait_for_completion_interruptible_timeout(&irqdata.done, 2 * HZ);
++
++	spin_lock_irq(&ddata->lock);
++
++	efm32_adc_write32(ddata, 0, ADC_IEN);
++	free_irq(ddata->irq, &irqdata);
++
++	if (ret < 0)
++		goto done_out_unlock;
++
++	status = efm32_adc_read32(ddata, ADC_STATUS);
++	if (status & ADC_STATUS_SINGLEDV) {
++		*val = efm32_adc_read32(ddata, ADC_SINGLEDATA);
++		ret = 0;
++	} else
++		ret = -ETIMEDOUT;
++
++done_out_unlock:
++	ddata->busy = 0;
++out_clkoff:
++	clk_disable(ddata->clk);
++out_unlock:
++	spin_unlock_irq(&ddata->lock);
++
++	clk_unprepare(ddata->clk);
++
++	return ret;
++}
++
++static ssize_t efm32_adc_read_chan(struct device *dev,
++		struct device_attribute *devattr, char *buf)
++{
++	unsigned int val;
++	int ret = efm32_adc_read_single(dev, devattr, &val);
++
++	if (ret)
++		return ret;
++
++	return sprintf(buf, "%u\n", val);
++}
++
++static ssize_t efm32_adc_read_temp(struct device *dev,
++		struct device_attribute *devattr, char *buf)
++{
++	unsigned int val;
++	int ret = efm32_adc_read_single(dev, devattr, &val);
++	/*
++	 * XXX: get these via pdata or read them from the device information
++	 * registers
++	 */
++	unsigned temp0 = 0x19 * 1000;
++	unsigned adc0 = 0x910;
++
++	if (ret)
++		return ret;
++
++	val = temp0 + DIV_ROUND_CLOSEST((adc0 - val) * 10000, 63);
++
++	return sprintf(buf, "%u\n", val);
++}
++
++static DEVICE_ATTR(name, S_IRUGO, efm32_adc_show_name, NULL);
++static SENSOR_DEVICE_ATTR(in8_input, S_IRUGO, efm32_adc_read_chan, NULL, 8);
++static SENSOR_DEVICE_ATTR(temp1_input, S_IRUGO, efm32_adc_read_temp, NULL, 8);
++
++static struct attribute *efm32_adc_attr[] = {
++	&dev_attr_name.attr,
++	&sensor_dev_attr_in8_input.dev_attr.attr,
++	&sensor_dev_attr_temp1_input.dev_attr.attr,
++	NULL
++};
++
++static const struct attribute_group efm32_adc_group = {
++	.attrs = efm32_adc_attr,
++};
++
++static int efm32_adc_probe(struct platform_device *pdev)
++{
++	struct efm32_adc_ddata *ddata;
++	struct resource *res;
++	int ret;
++
++	ddata = kzalloc(sizeof(*ddata), GFP_KERNEL);
++	if (!ddata)
++		return -ENOMEM;
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!res) {
++		ret = -ENXIO;
++		dev_dbg(&pdev->dev, "failed to determine base address\n");
++		goto err_get_base;
++	}
++
++	ret = platform_get_irq(pdev, 0);
++	if (ret <= 0) {
++		ret = -ENXIO;
++		dev_dbg(&pdev->dev, "failed to determine irq\n");
++		goto err_get_irq;
++	}
++	ddata->irq = ret;
++
++	ddata->base = ioremap(res->start, resource_size(res));
++	if (!ddata->base) {
++		ret = -ENOMEM;
++		dev_dbg(&pdev->dev, "failed to remap\n");
++		goto err_ioremap;
++	}
++
++	ddata->clk = clk_get(&pdev->dev, NULL);
++	if (IS_ERR(ddata->clk)) {
++		ret = PTR_ERR(ddata->clk);
++		dev_dbg(&pdev->dev, "failed to get clock\n");
++		goto err_clk_get;
++	}
++
++	platform_set_drvdata(pdev, ddata);
++	spin_lock_init(&ddata->lock);
++
++	ret = sysfs_create_group(&pdev->dev.kobj, &efm32_adc_group);
++	if (ret)
++		goto err_create_group;
++
++	ddata->hwmondev = hwmon_device_register(&pdev->dev);
++	if (IS_ERR(ddata->hwmondev)) {
++		ret = PTR_ERR(ddata->hwmondev);
++
++		sysfs_remove_group(&pdev->dev.kobj, &efm32_adc_group);
++err_create_group:
++
++		platform_set_drvdata(pdev, NULL);
++
++		clk_put(ddata->clk);
++err_clk_get:
++
++		iounmap(ddata->base);
++err_ioremap:
++err_get_irq:
++err_get_base:
++		kfree(ddata);
++	}
++
++	return ret;
++}
++
++static int efm32_adc_remove(struct platform_device *pdev)
++{
++	struct efm32_adc_ddata *ddata = platform_get_drvdata(pdev);
++
++	hwmon_device_unregister(ddata->hwmondev);
++	sysfs_remove_group(&pdev->dev.kobj, &efm32_adc_group);
++	platform_set_drvdata(pdev, NULL);
++	clk_put(ddata->clk);
++	iounmap(ddata->base);
++	kfree(ddata);
++
++	return 0;
++}
++
++static const struct of_device_id efm32_adc_dt_ids[] = {
++	{
++		.compatible = "efm32,adc",
++	}, {
++		/* sentinel */
++	}
++};
++MODULE_DEVICE_TABLE(of, efm32_adc_dt_ids);
++
++static struct platform_driver efm32_adc_driver = {
++	.probe = efm32_adc_probe,
++	.remove = efm32_adc_remove,
++	.driver = {
++		.name = DRIVER_NAME,
++		.owner = THIS_MODULE,
++		.of_match_table = efm32_adc_dt_ids,
++	},
++};
++module_platform_driver(efm32_adc_driver);
++
++MODULE_AUTHOR("Uwe Kleine-Koenig <u.kleine-koenig@pengutronix.de>");
++MODULE_DESCRIPTION("EFM32 ADC driver");
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS("platform:" DRIVER_NAME);

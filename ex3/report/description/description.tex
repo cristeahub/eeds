@@ -1,0 +1,64 @@
+\section{Development process and implementation}
+\label{chap:development_process}
+
+This chapter details the steps used during the development of the program.
+We started by re-implementing most of the code used in the previous exercise, only this time in C.
+In addition we set up a timer, which was to be used for interacting with the DAC.
+
+% - setting up interrupts from c
+% - embedding assembly
+
+\subsection{Setting up the DAC}
+
+To get sound playing on the board, we had to use the DAC, a Digital-to-Analog Converter.
+A timer was needed to be able to continuously write sound samples to the DAC.
+
+\subsection{Timer}
+
+The timer clock frequency is 14MHz, but for the music we only want a frequency of 44100Hz.
+Therefore we set the sample period to $ \frac{\SI{14}{\mega\hertz}}{\SI{44100}{\hertz}} \approx 317 $.
+This will ensure the timer interrupt is triggered 44100 times a second.
+
+\input{description/sound_synthesis.tex}
+
+\subsection{Pre-recorded melody}
+
+For the start-up melody, we chose to produce a song using FL Studio, a digital audio workstation.
+We would then export the .wav file and convert it to a C array, as a wav file consists of two channels of typically 44,100 samples per second, and 8 bits per sample.
+We had to first export the song to a 16-bit int .wav file, as FL Studio didn't accept 8-bit uint .wavformat.
+We opened the song in Audacity, as this audio editor allowed us to export it to a 8 bit int .wav file.
+Moreover, we used a Python library to convert the .wav samples to a C array, tailoring this general Python .wav interpreter code \cite{wav} to fit our needs. Our edited Python code to produce the C file that holds the two arrays that represents the two channels is shown in figure \ref{fig:python} in appendix A.
+
+The sound clip we made originally lasted around 15 seconds, which results in $\SI{44100}{Hz} * 15 \text{seconds} = 661500 \text{samples}$.
+Since this file was too large for the DAC, we shortened the song to 8 seconds.
+This wav-file amounted to 704 kB of space, which became 3.5 MB when converted to two arrays in C. This proved to be small enough for the DAC to interpret.
+
+The start up melody can be found here. \cite{song}
+
+\subsection{Button control}
+
+Buttons are set up to control one sound effect each. The remaining buttons will stop the sound currently playing.
+When a GPIO interrupt is triggered, we check whether any buttons are being pressed down.
+The first button which is currently being pressed will have its designated action executed.
+When one sound is initiated, any currently playing sound is cancelled immediately.
+
+\subsection{Energy consumption}
+
+The desire for this task was to be able to use as little power as possible.
+To achieve this we put a great deal of work into ensuring the program was put in the most energy saving state possible for the current task.
+This means that even though music was played, the card was still in an energy saving mode.
+
+For maximum efficiency the board dives straight into deep sleep after startup.
+One could agrue that a small opening sequence would be useful for the end user, but for this task the startup time could instead be instant.
+Since there are no definitive answer to this we thought we should go for maximum efficiency this time.
+
+Every interaction with the board gives a feedback.
+We made sure that the board goes back to sleep as soon as possible after the given task is done.
+When a song is played the interrupt handler wakes up the board and starts to play the song.
+If a new song is being played while a current song is playing, the current task is thrown away, and the new song starts.
+This technique ensures that no power is wasted on music the end user doesn't want.
+
+When the song is over the card by itself goes back into deep sleep and waits for another interrupt.
+
+The one thing that does use a lot of power is computing generated sounds.
+If one wanted to make a more energy efficient card, one could include more songs for playback, and not generate them live.

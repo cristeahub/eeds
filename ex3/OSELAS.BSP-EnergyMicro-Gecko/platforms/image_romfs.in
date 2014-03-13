@@ -1,0 +1,21 @@
+## SECTION=image
+
+menuconfig IMAGE_ROMFS
+	bool
+	select HOST_GENROMFS
+	prompt "Generate images/root.romfs    "
+	help
+	  Build a romfs image of the root filesystem. This image can be stored
+	  linearly into target's flash device at the start of the desired
+	  partition.
+
+if IMAGE_ROMFS
+
+config IMAGE_ROMFS_EXTRA_ARGS
+	string
+	default ""
+	prompt "extra arguments passed to genromfs"
+	help
+	  You can add extra arguments for mkromfs here
+
+endif

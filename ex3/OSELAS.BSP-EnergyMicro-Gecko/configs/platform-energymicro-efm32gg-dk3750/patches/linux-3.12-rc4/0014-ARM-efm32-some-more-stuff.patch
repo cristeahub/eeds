@@ -1,0 +1,298 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Tue, 12 Mar 2013 14:44:10 +0100
+Subject: [PATCH] ARM: efm32: some more stuff
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/Kconfig-nommu          |   4 +
+ arch/arm/mach-efm32/Makefile    |   2 +-
+ arch/arm/mach-efm32/common.c    | 199 ++++++++++++++++++++++++++++++++++++++++
+ arch/arm/mach-efm32/common.h    |   3 +
+ arch/arm/mach-efm32/dtmachine.c |  12 +++
+ 5 files changed, 219 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/mach-efm32/common.c
+ create mode 100644 arch/arm/mach-efm32/common.h
+
+diff --git a/arch/arm/Kconfig-nommu b/arch/arm/Kconfig-nommu
+index aed66d5..6128083 100644
+--- a/arch/arm/Kconfig-nommu
++++ b/arch/arm/Kconfig-nommu
+@@ -11,18 +11,22 @@ config SET_MEM_PARAM
+ 
+ config DRAM_BASE
+ 	hex '(S)DRAM Base Address' if SET_MEM_PARAM
++	default 0x88000000 if MACH_EFM32GG_DK3750
+ 	default 0x00800000
+ 
+ config DRAM_SIZE
+ 	hex '(S)DRAM SIZE' if SET_MEM_PARAM
++	default 0x00400000 if MACH_EFM32GG_DK3750
+ 	default 0x00800000
+ 
+ config FLASH_MEM_BASE
+ 	hex 'FLASH Base Address' if SET_MEM_PARAM
++	default 0x00000000 if MACH_EFM32GG_DK3750
+ 	default 0x00400000
+ 
+ config FLASH_SIZE
+ 	hex 'FLASH Size' if SET_MEM_PARAM
++	default 0x00100000 if MACH_EFM32GG_DK3750
+ 	default 0x00400000
+ 
+ config PROCESSOR_ID
+diff --git a/arch/arm/mach-efm32/Makefile b/arch/arm/mach-efm32/Makefile
+index 3a74af7..081f45a 100644
+--- a/arch/arm/mach-efm32/Makefile
++++ b/arch/arm/mach-efm32/Makefile
+@@ -1 +1 @@
+-obj-y += dtmachine.o
++obj-y += common.o dtmachine.o
+diff --git a/arch/arm/mach-efm32/common.c b/arch/arm/mach-efm32/common.c
+new file mode 100644
+index 0000000..bffc28e
+--- /dev/null
++++ b/arch/arm/mach-efm32/common.c
+@@ -0,0 +1,199 @@
++/*
++ * Copyright (C) 2012-2013 Uwe Kleine-Koenig for Pengutronix
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/bug.h>
++
++#include <asm/io.h>
++#include <asm/barrier.h>
++
++#include "common.h"
++
++#define MEM_INFO_FLASH		(void __iomem *)0x0fe081f8
++#define MEM_INFO_RAM		(void __iomem *)0x0fe081fa
++#define PART_NUMBER		(void __iomem *)0x0fe081fc
++#define PART_FAMILY		(void __iomem *)0x0fe081fe
++#define PROD_REV		(void __iomem *)0x0fe081ff
++
++static const struct efm32_family_mapping {
++	u8 id;
++	const char *name;
++	const char *abbrev;
++} efm32_family_mapping[] __initconst = {
++	{
++		.id = 71,
++		.name = "Gecko",
++		.abbrev = "G",
++	}, {
++		.id = 72,
++		.name = "Giant Gecko",
++		.abbrev = "GG",
++	}, {
++		.id = 73,
++		.name = "Tiny Gecko",
++		.abbrev = "TG",
++	}, {
++		.id = 74,
++		.name = "Leopard Gecko",
++		.abbrev = "LG",
++	}, {
++		.id = 75,
++		.name = "Zero Gecko",
++		.abbrev = "ZG",
++	},
++};
++
++static const char *__init efm32_get_familyname(u8 id)
++{
++	size_t i;
++
++	for (i = 0; i < ARRAY_SIZE(efm32_family_mapping) &&
++			efm32_family_mapping[i].id <= id; ++i) {
++		if (efm32_family_mapping[i].id == id)
++			return efm32_family_mapping[i].name;
++	}
++
++	return "unknown";
++}
++
++static const char *__init efm32_get_familyabbrev(u8 id)
++{
++	size_t i;
++
++	for (i = 0; i < ARRAY_SIZE(efm32_family_mapping) &&
++			efm32_family_mapping[i].id <= id; ++i) {
++		if (efm32_family_mapping[i].id == id)
++			return efm32_family_mapping[i].abbrev;
++	}
++
++	return "unknown";
++}
++
++static char revbuf[4] __initdata = "";
++static volatile const u32 * const romtable = (void *)0xe00fffe0;
++
++static const char *__init efm32_get_rev(void)
++{
++	if (revbuf[0] == '\0') {
++		u32 major = romtable[0] & 0x3f;
++		u32 minor = (romtable[2] & 0xf0) | ((romtable[3] >> 4) & 0x0f);
++
++		if (minor < 25)
++			sprintf(revbuf, "%u%c", major, 'A' + minor);
++		else {
++			revbuf[0] = '?';
++			revbuf[1] = '\0';
++		}
++	}
++	return revbuf;
++}
++
++void __init efm32_print_cpuinfo(void)
++{
++	u16 partno = __raw_readw(PART_NUMBER);
++	u8 family = __raw_readb(PART_FAMILY);
++	u8 rev = __raw_readb(PROD_REV);
++	u16 flashsize = __raw_readw(MEM_INFO_FLASH);
++	u16 raminfo = __raw_readw(MEM_INFO_RAM);
++
++	pr_info("Energy Micro %s, EFM32%s%hdF%hd (rev %s, prodrev %hhd), %hd kB RAM\n",
++			efm32_get_familyname(family),
++			efm32_get_familyabbrev(family), partno,
++			flashsize, efm32_get_rev(), rev, raminfo);
++}
++
++static const struct {
++	u32 value;
++	u32 mask;
++	const char *cause;
++} efm32_reset_causes[] __initconst = {
++	{
++		.value = 0x0001,
++		.mask = 0x0001,
++		.cause = "A Power-on Reset has been performed",
++	}, {
++		.value = 0x0002,
++		.mask = 0x0083,
++		.cause = "A Brown-out has been detected on the unregulated power",
++	}, {
++		.value = 0x0004,
++		.mask = 0x001f,
++		.cause = "A Brown-out has been detected on the regulated power",
++	}, {
++		.value = 0x0008,
++		.mask = 0x000b,
++		.cause = "An external reset has been applied",
++	}, {
++		.value = 0x0010,
++		.mask = 0x0013,
++		.cause = "A watchdog reset has occurred",
++	}, {
++		.value = 0x0020,
++		.mask = 0x07ff,
++		.cause = "A lockup reset has occurred",
++	}, {
++		.value = 0x0040,
++		.mask = 0x07df,
++		.cause = "A system request reset has occurred",
++	}, {
++		.value = 0x0080,
++		.mask = 0x0799,
++		.cause = "The system as woken up from EM4",
++	}, {
++		.value = 0x0180,
++		.mask = 0x799,
++		.cause = "The system as woken up from EM4 on an EM4 wakeup reset request from pin",
++	}, {
++		.value = 0x0200,
++		.mask = 0x079f,
++		.cause = "A Brown-out has been detected on Analog Power Domain 0 (AVDD0)",
++	}, {
++		.value = 0x0400,
++		.mask = 0x079f,
++		.cause = "A Brown-out has been detected on Analog Power Domain 1 (AVDD1)",
++	}, {
++		.value = 0x0800,
++		.mask = 0x0800,
++		.cause = "A Brown-out has been detected by the Backup BOD on VDD_DREG",
++	}, {
++		.value = 0x1000,
++		.mask = 0x1000,
++		.cause = "A Brown-out has been detected by the Backup BOD on BU_VIN",
++	}, {
++		.value = 0x2000,
++		.mask = 0x2000,
++		.cause = "A Brown-out has been detected by the Backup BOD on unregulated power",
++	}, {
++		.value= 0x4000,
++		.mask = 0x4000,
++		.cause = "A Brown-out has been detected by the Backup BOD on regulated power",
++	}, {
++		.value = 0x8000,
++		.mask = 0x8000,
++		.cause = "The system has been in Backup mode",
++	},
++};
++
++void __init efm32_print_reset_cause(void)
++{
++	u32 rmu_rstcause = __raw_readl((void __iomem *)0x400ca004);
++	int i;
++
++	pr_info("Reset Cause: 0x%08x\n", rmu_rstcause);
++
++	for (i = 0; i < ARRAY_SIZE(efm32_reset_causes); ++i) {
++		if ((rmu_rstcause & efm32_reset_causes[i].mask) ==
++				efm32_reset_causes[i].value)
++			pr_info(" `-> %s.\n", efm32_reset_causes[i].cause);
++	}
++
++	/* clear RMU_RSTCAUSE */
++	__raw_writel(1, (void __iomem *)0x400ca008);
++	__raw_writel(1, (void __iomem *)0x400c6024);
++	__raw_writel(0, (void __iomem *)0x400c6024);
++}
+diff --git a/arch/arm/mach-efm32/common.h b/arch/arm/mach-efm32/common.h
+new file mode 100644
+index 0000000..dd8f865
+--- /dev/null
++++ b/arch/arm/mach-efm32/common.h
+@@ -0,0 +1,3 @@
++void efm32_print_cpuinfo(void);
++
++void efm32_print_reset_cause(void);
+diff --git a/arch/arm/mach-efm32/dtmachine.c b/arch/arm/mach-efm32/dtmachine.c
+index 2367495..8fa5d56 100644
+--- a/arch/arm/mach-efm32/dtmachine.c
++++ b/arch/arm/mach-efm32/dtmachine.c
+@@ -1,15 +1,27 @@
+ #include <linux/kernel.h>
++#include <linux/of_platform.h>
+ 
+ #include <asm/v7m.h>
+ 
+ #include <asm/mach/arch.h>
+ 
++#include "common.h"
++
++static void __init efm32_init(void)
++{
++	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
++
++	efm32_print_reset_cause();
++	efm32_print_cpuinfo();
++}
++
+ static const char *const efm32gg_compat[] __initconst = {
+ 	"efm32,dk3750",
+ 	NULL
+ };
+ 
+ DT_MACHINE_START(EFM32DT, "EFM32 (Device Tree Support)")
++	.init_machine = efm32_init,
+ 	.dt_compat = efm32gg_compat,
+ 	.restart = armv7m_restart,
+ MACHINE_END

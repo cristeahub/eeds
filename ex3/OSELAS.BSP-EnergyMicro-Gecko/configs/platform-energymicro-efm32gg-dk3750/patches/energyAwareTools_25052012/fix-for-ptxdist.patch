@@ -1,0 +1,12 @@
+Index: energyAwareTools_25052012/eACommander.sh
+===================================================================
+--- energyAwareTools_25052012.orig/eACommander.sh	2012-05-21 13:27:41.000000000 +0200
++++ energyAwareTools_25052012/eACommander.sh	2012-07-26 09:12:26.370360327 +0200
+@@ -4,5 +4,5 @@
+ # Run Commander
+ #
+ DIR="$( cd "$( dirname "$0" )" && pwd )"
+-export LD_LIBRARY_PATH="${DIR}/lib":/usr/lib32/gio/modules:$LD_LIBRARY_PATH
+-"${DIR}/bin/eACommander" "$@"
++export LD_LIBRARY_PATH="${DIR}/../lib/energyAwareTools":/usr/lib32/gio/modules
++"${DIR}/../lib/energyAwareTools/eACommander" --flashloader "${DIR}/../lib/energyAwareTools/nandflashloader.bin" "$@"

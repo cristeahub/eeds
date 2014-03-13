@@ -1,0 +1,12 @@
+#!/bin/sh
+
+cat /etc/issue
+
+# redirect error messages to /dev/null to suppress the error message if PROC is
+# disabled in the kernel
+mount -t proc proc /proc 2>/dev/null
+mount -t sysfs sys /sys
+
+
+export PATH=$PATH:/sbin:/usr/bin:/bin
+exec /bin/sh

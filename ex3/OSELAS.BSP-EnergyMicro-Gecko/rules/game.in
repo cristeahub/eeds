@@ -1,0 +1,7 @@
+## SECTION=project_specific
+
+config GAME
+	tristate
+	prompt "game"
+	help
+	  FIXME

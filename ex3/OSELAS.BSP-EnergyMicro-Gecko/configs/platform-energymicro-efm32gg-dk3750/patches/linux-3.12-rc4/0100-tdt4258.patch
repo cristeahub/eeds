@@ -1,0 +1,146 @@
+diff -rupN linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg-dk3750.dts linux-3.12-rc4_tdt4258/arch/arm/boot/dts/efm32gg-dk3750.dts
+--- linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg-dk3750.dts	2013-12-13 18:04:42.843220815 +0100
++++ linux-3.12-rc4_tdt4258/arch/arm/boot/dts/efm32gg-dk3750.dts	2013-12-13 18:07:33.009081540 +0100
+@@ -41,47 +41,10 @@
+ 			};
+ 		};
+ 
+-		spi0: spi@4000c000 { /* USART0 */
+-			cs-gpios = <&gpio 68 1>; // E4
+-			location = <1>;
+-			status = "ok";
+-
+-			microsd@0 {
+-				compatible = "mmc-spi-slot";
+-				spi-max-frequency = <100000>;
+-				voltage-ranges = <3200 3400>;
+-				broken-cd;
+-				reg = <0>;
+-			};
+-		};
+-
+-		spi1: spi@4000c400 { /* USART1 */
+-			cs-gpios = <&gpio 51 1>; // D3
+-			location = <1>;
+-			status = "ok";
+-
+-			ks8851@0 {
+-				compatible = "ks8851";
+-				spi-max-frequency = <6000000>;
+-				reg = <0>;
+-				interrupt-parent = <&boardfpga>;
+-				interrupts = <4>;
+-			};
+-		};
+-
+ 		uart4: uart@4000e400 { /* UART1 */
+ 			location = <2>;
+ 			status = "ok";
+ 		};
+-
+-		boardfpga: boardfpga {
+-			compatible = "efm32board";
+-			reg = <0x80000000 0x400>;
+-			irq-gpios = <&gpio 64 1>;
+-			interrupt-controller;
+-			#interrupt-cells = <1>;
+-			status = "ok";
+-		};
+ 	};
+ 
+  	framebuffer {
+diff -rupN linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg.dtsi linux-3.12-rc4_tdt4258/arch/arm/boot/dts/efm32gg.dtsi
+--- linux-3.12-rc4_original/arch/arm/boot/dts/efm32gg.dtsi	2013-12-13 18:04:42.795221418 +0100
++++ linux-3.12-rc4_tdt4258/arch/arm/boot/dts/efm32gg.dtsi	2014-03-05 08:34:58.958914425 +0100
+@@ -22,6 +22,14 @@
+ 	};
+ 
+ 	soc {
++
++    tdt4258: tdt4258@0x40006000 {
++		  compatible = "tdt4258";
++      reg = <0x40006000 0x200>, <0x40010c00 0x400>, <0x400c2000 0x2000>, <0x40004000 0x100>;
++  		interrupts = <1 11 14 0 8>;
++  		clocks = <&cmu clk_HFPERCLKGPIO>, <&cmu clk_HFPERCLKTIMER3>, <&cmu clk_HFCORECLKDMA>, <&cmu clk_HFPERCLKDAC0>;
++    };
++
+ 		adc: adc@40002000 {
+ 			compatible = "efm32,adc";
+ 			reg = <0x40002000 0x400>;
+@@ -30,18 +38,6 @@
+ 			status = "disabled";
+ 		};
+ 
+-		gpio: gpio@40006000 {
+-			compatible = "efm32,gpio";
+-			reg = <0x40006000 0x1000>;
+-			interrupts = <1 11>;
+-			gpio-controller;
+-			#gpio-cells = <2>;
+-			interrupt-controller;
+-			#interrupt-cells = <1>;
+-			clocks = <&cmu clk_HFPERCLKGPIO>;
+-			status = "ok";
+-		};
+-
+ 		i2c0: i2c@4000a000 {
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -155,13 +151,6 @@
+ 			clocks = <&cmu clk_HFPERCLKTIMER2>;
+ 		};
+ 
+-		timer3: timer@40010c00 {
+-			compatible = "efm32,timer";
+-			reg = <0x40010c00 0x400>;
+-			interrupts = <14>;
+-			clocks = <&cmu clk_HFPERCLKTIMER3>;
+-		};
+-
+ 		cmu: cmu@400c8000 {
+ 			compatible = "efm32gg,cmu";
+ 			reg = <0x400c8000 0x400>;
+diff -rupN linux-3.12-rc4_original/arch/arm/mach-efm32/dtmachine.c linux-3.12-rc4_tdt4258/arch/arm/mach-efm32/dtmachine.c
+--- linux-3.12-rc4_original/arch/arm/mach-efm32/dtmachine.c	2013-12-13 18:04:42.799221368 +0100
++++ linux-3.12-rc4_tdt4258/arch/arm/mach-efm32/dtmachine.c	2014-03-06 11:17:21.602237714 +0100
+@@ -7,12 +7,19 @@
+ 
+ #include "common.h"
+ 
++#define BC_REGISTER_BASE 0x80000000
++#define BC_PERICON ((volatile uint16_t*)(BC_REGISTER_BASE + 0x18))
++#define BC_PERICON_AUDIO_OUT_SHIFT (1 << 3)
++
+ static void __init efm32_init(void)
+ {
+ 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
+ 
+ 	efm32_print_reset_cause();
+ 	efm32_print_cpuinfo();
++
++  // Enable sound output for TDT4258 exercises
++  *BC_PERICON |= BC_PERICON_AUDIO_OUT_SHIFT;
+ }
+ 
+ static const char *const efm32gg_compat[] __initconst = {
+diff -rupN linux-3.12-rc4_original/drivers/clk/clk-efm32gg.c linux-3.12-rc4_tdt4258/drivers/clk/clk-efm32gg.c
+--- linux-3.12-rc4_original/drivers/clk/clk-efm32gg.c	2013-12-13 18:04:42.791221469 +0100
++++ linux-3.12-rc4_tdt4258/drivers/clk/clk-efm32gg.c	2014-03-05 09:40:36.521412561 +0100
+@@ -76,6 +76,17 @@ static int __init efm32gg_cmu_init(struc
+ 	clk[clk_HFPERCLKDAC0] = clk_register_gate(NULL, "HFPERCLK.DAC0",
+ 			"HFXO", 0, base + CMU_HFPERCLKEN0, 17, 0, NULL);
+ 
++  // enable clocks needed for TDT4258 exercises
++  // totally the wrong way to do this, but no time to find a better one
++  clk_prepare(clk[clk_HFPERCLKGPIO]);
++  clk_enable(clk[clk_HFPERCLKGPIO]);
++  clk_prepare(clk[clk_HFPERCLKDAC0]);
++  clk_enable(clk[clk_HFPERCLKDAC0]);
++  clk_prepare(clk[clk_HFPERCLKTIMER3]);
++  clk_enable(clk[clk_HFPERCLKTIMER3]);
++  clk_prepare(clk[clk_HFPERCLKPRS]);
++  clk_enable(clk[clk_HFPERCLKPRS]);
++
+ 	return of_clk_add_provider(np, of_clk_src_onecell_get, &clk_data);
+ }
+ CLK_OF_DECLARE(efm32ggcmu, "efm32gg,cmu", efm32gg_cmu_init);

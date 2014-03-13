@@ -1,0 +1,39 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Mon, 30 Sep 2013 11:05:35 +0200
+Subject: [PATCH] ARM: drop !ARCH_MULTIPLATFORM dependency of XIP_KERNEL
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Enabling XIP_KERNEL requires specifying the physical address of the readonly
+memory. As these addresses vary among different SoCs and even machines with
+the same SoC enabling XIP_KERNEL might restrict the set of machines that can
+run the resulting kernel to a subset of the configured in machines.
+
+Still allowing XIP_KERNEL for a MULTIPLATFORM kernel makes sense as for some
+platforms MULTIPLATFORM is mandatory (e.g. bcm, highbank or imx). So to
+allow compiling a XIP kernel for these platforms, allow selecting XIP in the
+presence of ARCH_MULTIPLATFORM.
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+This patch might be problematic for compile coverage testing according to
+Arnd. Still I need XIP for my efm32 machine as it only features 4 MiB of
+RAM.
+---
+ arch/arm/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 23029da..efdd6ef 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -2099,7 +2099,7 @@ endchoice
+ 
+ config XIP_KERNEL
+ 	bool "Kernel Execute-In-Place from ROM"
+-	depends on !ZBOOT_ROM && !ARM_LPAE && !ARCH_MULTIPLATFORM
++	depends on !ZBOOT_ROM && !ARM_LPAE
+ 	help
+ 	  Execute-In-Place allows the kernel to run from non-volatile storage
+ 	  directly addressable by the CPU, such as NOR flash. This saves RAM

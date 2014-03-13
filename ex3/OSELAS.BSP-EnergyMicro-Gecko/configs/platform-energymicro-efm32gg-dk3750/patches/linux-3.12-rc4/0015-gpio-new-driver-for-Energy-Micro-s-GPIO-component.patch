@@ -1,0 +1,410 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Tue, 12 Feb 2013 23:31:27 +0100
+Subject: [PATCH] gpio: new driver for Energy Micro's GPIO component
+
+---
+ drivers/gpio/Kconfig      |   4 +
+ drivers/gpio/Makefile     |   1 +
+ drivers/gpio/gpio-efm32.c | 366 ++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 371 insertions(+)
+ create mode 100644 drivers/gpio/gpio-efm32.c
+
+diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
+index b6ed304..2a3c5af 100644
+--- a/drivers/gpio/Kconfig
++++ b/drivers/gpio/Kconfig
+@@ -127,6 +127,10 @@ config GPIO_IT8761E
+ 	help
+ 	  Say yes here to support GPIO functionality of IT8761E super I/O chip.
+ 
++config GPIO_EFM32
++	tristate "Energy Micro EFM32 GPIO support"
++	depends on ARCH_EFM32
++
+ config GPIO_EM
+ 	tristate "Emma Mobile GPIO"
+ 	depends on ARM
+diff --git a/drivers/gpio/Makefile b/drivers/gpio/Makefile
+index 98e23eb..9b66f5f 100644
+--- a/drivers/gpio/Makefile
++++ b/drivers/gpio/Makefile
+@@ -22,6 +22,7 @@ obj-$(CONFIG_GPIO_CS5535)	+= gpio-cs5535.o
+ obj-$(CONFIG_GPIO_DA9052)	+= gpio-da9052.o
+ obj-$(CONFIG_GPIO_DA9055)	+= gpio-da9055.o
+ obj-$(CONFIG_ARCH_DAVINCI)	+= gpio-davinci.o
++obj-$(CONFIG_GPIO_EFM32)	+= gpio-efm32.o
+ obj-$(CONFIG_GPIO_EM)		+= gpio-em.o
+ obj-$(CONFIG_GPIO_EP93XX)	+= gpio-ep93xx.o
+ obj-$(CONFIG_GPIO_F7188X)	+= gpio-f7188x.o
+diff --git a/drivers/gpio/gpio-efm32.c b/drivers/gpio/gpio-efm32.c
+new file mode 100644
+index 0000000..01addc7
+--- /dev/null
++++ b/drivers/gpio/gpio-efm32.c
+@@ -0,0 +1,366 @@
++/*
++ * Copyright (C) 2013 Pengutronix
++ * Uwe Kleine-Koenig <u.kleine-koenig@pengutronix.de>
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ *
++ * TODO:
++ *  - disable clk in suspend iff no irq is enabled to wake the system
++ */
++#include <linux/platform_device.h>
++#include <linux/device.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include <linux/of_address.h>
++#include <linux/irqdomain.h>
++#include <linux/interrupt.h>
++#include <linux/gfp.h>
++#include <linux/module.h>
++#include <linux/irq.h>
++#include <linux/clk.h>
++
++#include <asm/gpio.h>
++#include <asm/io.h>
++
++#define DRIVER_NAME	"efm32-gpio"
++
++#define GPIO_Px_MODEL(p)	(0x024 * (p) + 0x004)
++#define GPIO_Px_MODEH(p)	(0x024 * (p) + 0x008)
++#define GPIO_Px_DOUT(p)		(0x024 * (p) + 0x00c)
++#define GPIO_Px_DOUTSET(p)	(0x024 * (p) + 0x010)
++#define GPIO_Px_DOUTCLR(p)	(0x024 * (p) + 0x014)
++#define GPIO_Px_DIN(p)		(0x024 * (p) + 0x01c)
++#define GPIO_EXTIPSELL		0x100
++#define GPIO_EXTIPSELH		0x104
++#define GPIO_IEN		0x110
++#define GPIO_IF			0x114
++#define GPIO_IFC		0x11c
++
++struct efm32_gpio_ddata {
++	void __iomem *base;
++	spinlock_t lock;
++	struct clk *clk;
++	unsigned int irq_even, irq_odd;
++	struct irq_domain *irq_domain;
++	struct gpio_chip chip;
++	unsigned assigned_irqpins;
++};
++
++#define to_ddata(chip)	container_of(chip, struct efm32_gpio_ddata, chip)
++
++static unsigned efm32_gpio_get_mode(struct efm32_gpio_ddata *ddata,
++	       	unsigned pin, unsigned port)
++{
++	return (readl(ddata->base + (pin < 8 ? GPIO_Px_MODEL(port) : GPIO_Px_MODEH(port))) >> (4 * (pin & 7))) & 0xf;
++
++}
++static int efm32_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
++{
++	struct efm32_gpio_ddata *ddata = to_ddata(chip);
++	unsigned pin = offset % 16;
++	unsigned port = offset / 16;
++	unsigned mode;
++	int ret;
++
++	mode = efm32_gpio_get_mode(ddata, pin, port);
++
++	/*
++	 * XXX: don't reconfigure, needs to be resolved in combination with a
++	 * pinmux driver
++	 */
++	if (mode > 0 && mode < 4)
++		ret = 0;
++	else
++		ret = -EIO;
++
++	return ret;
++}
++
++static int efm32_gpio_get(struct gpio_chip *chip, unsigned offset)
++{
++	struct efm32_gpio_ddata *ddata = to_ddata(chip);
++	unsigned pin = offset % 16;
++	unsigned port = offset / 16;
++
++	/* XXX use bitband to simplify? */
++	return readl(ddata->base + GPIO_Px_DIN(port)) & (1 << pin);
++}
++
++static int efm32_gpio_direction_output(struct gpio_chip *chip,
++		unsigned offset, int value)
++{
++	struct efm32_gpio_ddata *ddata = to_ddata(chip);
++	unsigned pin = offset % 16;
++	unsigned port = offset / 16;
++	unsigned mode;
++	int ret;
++
++	mode = efm32_gpio_get_mode(ddata, pin, port);
++	/*
++	 * XXX: don't reconfigure, needs to be resolved in combination with a
++	 * pinmux driver
++	 */
++	if (mode >= 4)
++		ret = 0;
++	else
++		ret = -EIO;
++
++	return ret;
++}
++
++static void efm32_gpio_set(struct gpio_chip *chip,
++		unsigned offset, int value)
++{
++	struct efm32_gpio_ddata *ddata = to_ddata(chip);
++	unsigned pin = offset % 16;
++	unsigned port = offset / 16;
++
++	writel(1 << pin, ddata->base +
++			(value ? GPIO_Px_DOUTSET(port) : GPIO_Px_DOUTCLR(port)));
++}
++
++static int efm32_gpio_to_irq(struct gpio_chip *chip, unsigned offset)
++{
++	struct efm32_gpio_ddata *ddata = to_ddata(chip);
++	unsigned pin = offset % 16;
++	unsigned port = offset / 16;
++	unsigned extipsel_offset = pin < 8 ? GPIO_EXTIPSELL : GPIO_EXTIPSELH;
++	unsigned extipsel;
++	unsigned extipsel_shift = (pin % 8) * 4;
++
++	spin_lock(&ddata->lock);
++
++	extipsel = readl(ddata->base + extipsel_offset);
++
++	if (ddata->assigned_irqpins & (1 << pin)) {
++		if (((extipsel >> extipsel_shift) & 0x7) != port) {
++			spin_unlock(&ddata->lock);
++			clk_disable(ddata->clk);
++			return -EBUSY;
++		}
++	}
++
++	extipsel &= ~(0x7 << extipsel_shift);
++	extipsel |= port << extipsel_shift;
++	ddata->assigned_irqpins |= 1 << pin;
++	writel(extipsel, ddata->base + extipsel_offset);
++
++	spin_unlock(&ddata->lock);
++
++	return irq_create_mapping(ddata->irq_domain, offset % 16);
++}
++
++static irqreturn_t efm32_gpio_handler(struct efm32_gpio_ddata *ddata, unsigned mask)
++{
++	unsigned flag, init_flag;
++	irqreturn_t iret = IRQ_NONE;
++
++	init_flag = flag = readl(ddata->base + GPIO_IF) & mask;
++
++	while (flag) {
++		int line = __fls(flag);
++
++		writel(1 << line, ddata->base + GPIO_IFC);
++		if (generic_handle_irq(irq_create_mapping(ddata->irq_domain, line)))
++			iret = IRQ_HANDLED;
++
++		flag &= ~(1 << line);
++	}
++	return iret;
++}
++
++static irqreturn_t efm32_gpio_handler_even(int irq, void *data)
++{
++	struct efm32_gpio_ddata *ddata = data;
++	return efm32_gpio_handler(ddata, 0x55555555U);
++}
++
++static irqreturn_t efm32_gpio_handler_odd(int irq, void *data)
++{
++	struct efm32_gpio_ddata *ddata = data;
++	return efm32_gpio_handler(ddata, 0xaaaaaaaaU);
++}
++
++static void efm32_gpio_irq_ack(struct irq_data *data)
++{
++	struct efm32_gpio_ddata *ddata = irq_get_chip_data(data->irq);
++
++	writel(1 << data->hwirq, ddata->base + GPIO_IFC);
++}
++
++static void efm32_gpio_irq_mask(struct irq_data *data)
++{
++	struct efm32_gpio_ddata *ddata = irq_get_chip_data(data->irq);
++	unsigned ien;
++
++	spin_lock(&ddata->lock);
++       	ien = readl(ddata->base + GPIO_IEN);
++	ien &= ~(1 << data->hwirq);
++	writel(ien, ddata->base + GPIO_IEN);
++	spin_unlock(&ddata->lock);
++}
++
++static void efm32_gpio_irq_unmask(struct irq_data *data)
++{
++	struct efm32_gpio_ddata *ddata = irq_get_chip_data(data->irq);
++	unsigned ien;
++
++	spin_lock(&ddata->lock);
++	ien = readl(ddata->base + GPIO_IEN);
++	ien |= 1 << data->hwirq;
++	writel(ien, ddata->base + GPIO_IEN);
++	spin_unlock(&ddata->lock);
++}
++
++static struct irq_chip efm32_gpio_irqchip = {
++	.irq_ack = efm32_gpio_irq_ack,
++	.irq_mask = efm32_gpio_irq_mask,
++	.irq_unmask = efm32_gpio_irq_unmask,
++};
++
++static int efm32_gpio_irq_map(struct irq_domain *d, unsigned int virq,
++		irq_hw_number_t hw)
++{
++	struct efm32_gpio_ddata *ddata = d->host_data;
++
++	irq_set_chip_data(virq, ddata);
++	irq_set_chip_and_handler(virq, &efm32_gpio_irqchip, handle_edge_irq);
++
++	set_irq_flags(virq, IRQF_VALID | IRQF_PROBE);
++
++	return 0;
++}
++
++static const struct irq_domain_ops efm32_gpio_irq_domain_ops = {
++	.map = efm32_gpio_irq_map,
++};
++
++static int efm32_gpio_probe(struct platform_device *pdev)
++{
++	struct efm32_gpio_ddata *ddata;
++	struct resource *res;
++	int ret = -ENOMEM;
++	int irq_even, irq_odd;
++
++	ddata = devm_kzalloc(&pdev->dev, sizeof(*ddata), GFP_KERNEL);
++	if (!ddata) {
++		dev_err(&pdev->dev, "cannot allocate driver data");
++		return -ENOMEM;
++	}
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!res) {
++		dev_err(&pdev->dev, "can't get device resources\n");
++		return -ENOENT;
++	}
++
++	ddata->clk = devm_clk_get(&pdev->dev, NULL);
++	if (IS_ERR(ddata->clk)) {
++		ret = PTR_ERR(ddata->clk);
++		dev_err(&pdev->dev, "can't get clock (%d)\n", ret);
++		return ret;
++	}
++
++	irq_even = platform_get_irq(pdev, 0);
++	irq_odd = platform_get_irq(pdev, 1);
++	if (irq_even <= 0 || irq_odd <= 0) {
++		dev_err(&pdev->dev, "can't get irq numbers (%d, %d)\n",
++				irq_even, irq_odd);
++		return -ENOENT;
++	}
++	ddata->irq_even = irq_even;
++	ddata->irq_odd = irq_odd;
++
++	ddata->base = devm_request_and_ioremap(&pdev->dev, res);
++	if (!ddata->base) {
++		dev_err(&pdev->dev,
++				"cannot request and ioremap register set\n");
++		return -EADDRNOTAVAIL;
++	}
++
++	spin_lock_init(&ddata->lock);
++
++	ret = clk_prepare_enable(ddata->clk);
++	if (ret < 0) {
++		dev_err(&pdev->dev, "cannot enable clock (%d)\n", ret);
++		return ret;
++	}
++
++	/* disable and clear irqs */
++	writel(0, ddata->base + GPIO_IEN);
++	writel(0xffff, ddata->base + GPIO_IFC);
++
++	ddata->irq_domain = irq_domain_add_linear(pdev->dev.of_node,
++			16, &efm32_gpio_irq_domain_ops, ddata);
++	if (!ddata->irq_domain) {
++		dev_err(&pdev->dev, "failed to add irq_domain\n");
++		goto err_add_irq_domain;
++	}
++
++	ddata->chip.label = DRIVER_NAME;
++	ddata->chip.dev = &pdev->dev;
++	ddata->chip.owner = THIS_MODULE;
++
++	//ddata->chip.get_direction
++	ddata->chip.direction_input = efm32_gpio_direction_input;
++	ddata->chip.get = efm32_gpio_get;
++	ddata->chip.direction_output = efm32_gpio_direction_output;
++	ddata->chip.set = efm32_gpio_set;
++	ddata->chip.to_irq = efm32_gpio_to_irq;
++	ddata->chip.base = -1;
++	ddata->chip.ngpio = 96;
++	ddata->chip.can_sleep = 0;
++
++	ret = request_irq(ddata->irq_even, efm32_gpio_handler_even,
++			0, DRIVER_NAME, ddata);
++	if (ret)
++		goto err_request_even_irq;
++
++	ret = request_irq(ddata->irq_odd, efm32_gpio_handler_odd,
++			0, DRIVER_NAME, ddata);
++	if (ret)
++		goto err_request_odd_irq;
++
++	ret = gpiochip_add(&ddata->chip);
++	if (ret) {
++		free_irq(ddata->irq_odd, ddata);
++err_request_odd_irq:
++
++		free_irq(ddata->irq_even, ddata);
++err_request_even_irq:
++
++		irq_domain_remove(ddata->irq_domain);
++	}
++
++err_add_irq_domain:
++	return ret;
++}
++
++static const struct of_device_id efm32_gpio_dt_ids[] = {
++	{
++		.compatible = "efm32,gpio",
++	}, {
++		/* sentinel */
++	}
++};
++MODULE_DEVICE_TABLE(of, efm32_gpio_dt_ids);
++
++static struct platform_driver efm32_gpio_driver = {
++	.probe = efm32_gpio_probe,
++
++	.driver = {
++		.name = DRIVER_NAME,
++		.owner = THIS_MODULE,
++		.of_match_table = efm32_gpio_dt_ids,
++	},
++};
++
++static int __init efm32_gpio_init(void)
++{
++	return platform_driver_register(&efm32_gpio_driver);
++}
++postcore_initcall(efm32_gpio_init);
++
++MODULE_LICENSE("GPL v2");

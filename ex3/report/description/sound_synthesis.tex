@@ -1,0 +1,96 @@
+\subsection{Sound synthesis}
+The sound effects we've implemented are all generated in real-time on the board.
+We made four different sound effects: a coin blip, a lasera level-up sound, and an alert.
+They are all based on a simple waveform, either a square wave or a sawtooth.
+Each sound has parameters that are allowed to change for each playback.
+Those parameters include frequency, slide, and ADSR parameters.
+To leverage the fact that the sound samples are generated on-the-fly, we added a bit of randomization to the ADSR parameters.
+This made each playback of a sound effect unique, so each time you press the button for a given sound effect it will sound slightly different.
+In addition to varying the ADSR parameters, the frequency was randomized within a given interval for each of the sound effects.
+We also added a custom slide to each of them – this allowed the frequency to change gradually during the sound.
+
+\subsubsection{ADSR}
+
+A waveform with constant frequency alone would not provide the sound effects we wanted. We therefore implemented a ADSR envelope \cite{adsr}.
+The envelope consists of an attack period, a decay period, a sustain level and a release period, as seen in figure \ref{fig:adsr_envelope}.
+
+\begin{itemize}
+    \item The attack periode is the time to use from zero to maximum amplitude.
+    \item The decay is the time from max amplitude down to the sustain level.
+    \item The sustain level is the amplitude to rest on between the decay and release periods.
+    \item The release indicates how much time to spend fading from the sustain level to zero volume.
+\end{itemize}
+
+\begin{figure}[ht!]
+    \begin{center}
+    \includegraphics[width=0.8\textwidth]{assets/img/adsr.png}
+    \caption{A ADSR envelope \cite{adsr}}
+    \label{fig:adsr_envelope}
+    \end{center}
+\end{figure}
+
+\subsubsection{Effects}
+
+The parameter intervals for the four implemented sound effects can be seen in Table \ref{tab:sound_effects}.
+
+\begin{table}[ht!]
+    \begin{center}
+    \begin{tabular}{r|llll}
+    Parameter         & Coin       & Laser             & Level-up   & Alert      \\
+    \hline
+    Waveform          & Square     & Square / Sawtooth & Sawtooth   & Sawtooth   \\
+    Initial frequency & 1500-3000  & 1200-3200         & 100-1100   & 175-255    \\
+    Slide             & 0          & -2                & 3-6        & 0          \\
+    Attack            & 0          & 0                 & 0-500      & 0          \\
+    Decay             & 0-3500     & 1000-3000         & 1000-3000  & 500-1500   \\
+    Sustain level     & 30-80      & 0-50              & 50-100     & 50-100     \\
+    Release           & 4000-18000 & 4500-10500        & 2500-16500 & 2500-16500 \\
+    \end{tabular}
+    \end{center}
+    \caption{Parameter intervals for the implemented sound effects}
+    \label{tab:sound_effects}
+\end{table}
+
+\begin{figure}[ht!]
+\begin{code}
+void generate_coin() {
+    current_sound = (Sound){
+        .freq = rand() % 1500 + 1500,
+        .a = 0,
+        .d = rand() % 3500,
+        .s = rand() % 50 + 30,
+        .r = rant() % 14000 + 4000,
+        .slide = 0,
+        .wave = int_square
+    };
+    i = 0;
+}
+\end{code}
+\caption{Code for generating a coin pick sound}
+\label{fig:coin}
+\end{figure}
+
+All sound effect calculations are done with integers, to ensure that the calculations are fast enough to be processed within one timer interval.
+For each effect, there's a function to initalize a struct with the sounds custom parameters. This funtion will be called each time the sound's corresponding button is pressed. An example of this may be seen in Figure \ref{fig:coin}.
+
+\subsubsection{Custom random function}
+
+There was no rand() function available, so we made one ourselves.
+
+\begin{figure}[!ht]
+\begin{code}
+
+static unsigned int next = 1;
+
+int rand_r(unsigned int *seed) {
+    *seed = *seed * 1103515245 + 12345;
+    return (*seed % ((unsigned int)RAND_MAX + 1));
+}
+
+int rand() {
+    return (rand_r(&next));
+}
+
+\end{code}
+\caption{The random function}
+\end{figure}

@@ -1,0 +1,29 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Mon, 4 Nov 2013 10:08:35 +0100
+Subject: [PATCH] ARM: v7-M: drop using mach/entry-macro.S
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The only v7-M platform only has some unused stubs in its
+mach/entry-macro.S file. So don't include it which allows efm32 to drop
+the file.
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/kernel/entry-v7m.S | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/arm/kernel/entry-v7m.S b/arch/arm/kernel/entry-v7m.S
+index 52b2643..2260f18 100644
+--- a/arch/arm/kernel/entry-v7m.S
++++ b/arch/arm/kernel/entry-v7m.S
+@@ -14,8 +14,6 @@
+ #include <asm/thread_notify.h>
+ #include <asm/v7m.h>
+ 
+-#include <mach/entry-macro.S>
+-
+ #include "entry-header.S"
+ 
+ #ifdef CONFIG_TRACE_IRQFLAGS

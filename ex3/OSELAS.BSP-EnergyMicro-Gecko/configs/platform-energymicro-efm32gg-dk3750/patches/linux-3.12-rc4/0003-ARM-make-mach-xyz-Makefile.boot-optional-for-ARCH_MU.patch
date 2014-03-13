@@ -1,0 +1,63 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Mon, 21 Oct 2013 18:16:59 +0200
+Subject: [PATCH] ARM: make mach-xyz/Makefile.boot optional for
+ !ARCH_MULTIPLATFORM
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Makefile.boot is supposed to define zreladdr-y, params_phys-y and
+initrd_phys-y. The first one is only needed in the absence of AUTO_ZRELADDR
+and when building a zImage. The latters are only needed for bootp stuff.
+So ignore errors on including Makefile.boot and error out in the targets
+that need the corresponding settings.
+
+This makes it unnecessary to create dummy Makefile.boot files.
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/boot/Makefile | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/Makefile b/arch/arm/boot/Makefile
+index 84aa2ca..44203b3 100644
+--- a/arch/arm/boot/Makefile
++++ b/arch/arm/boot/Makefile
+@@ -12,7 +12,7 @@
+ #
+ 
+ ifneq ($(MACHINE),)
+-include $(srctree)/$(MACHINE)/Makefile.boot
++sinclude $(srctree)/$(MACHINE)/Makefile.boot
+ endif
+ 
+ # Note: the following conditions must always be true:
+@@ -51,10 +51,19 @@ $(obj)/Image: vmlinux FORCE
+ $(obj)/compressed/vmlinux: $(obj)/Image FORCE
+ 	$(Q)$(MAKE) $(build)=$(obj)/compressed $@
+ 
++ifneq ($(CONFIG_AUTO_ZRELADDR)$(ZRELADDR),)
++
+ $(obj)/zImage:	$(obj)/compressed/vmlinux FORCE
+ 	$(call if_changed,objcopy)
+ 	@$(kecho) '  Kernel: $@ is ready'
+ 
++else
++
++$(obj)/zImage: FORCE
++	@echo 'Either enable CONFIG_AUTO_ZRELADDR or provide zreladdr-y in Makefile.boot'
++	@false
++
++endif
+ endif
+ 
+ ifneq ($(LOADADDR),)
+@@ -81,6 +90,8 @@ $(obj)/uImage:	$(obj)/zImage FORCE
+ 	@$(kecho) '  Image $@ is ready'
+ 
+ $(obj)/bootp/bootp: $(obj)/zImage initrd FORCE
++	@test -n "$(PARAMS_PHYS)" || \
++	(echo This machine does not support BOOTP; exit -1)
+ 	$(Q)$(MAKE) $(build)=$(obj)/bootp $@
+ 	@:
+ 

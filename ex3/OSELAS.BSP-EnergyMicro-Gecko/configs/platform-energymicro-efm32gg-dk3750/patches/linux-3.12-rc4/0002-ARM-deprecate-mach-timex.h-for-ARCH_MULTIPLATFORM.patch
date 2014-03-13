@@ -1,0 +1,869 @@
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Mon, 21 Oct 2013 11:07:04 +0200
+Subject: [PATCH] ARM: deprecate mach/timex.h for !ARCH_MULTIPLATFORM
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+While mach/timex.h isn't used for multi-platform builds it still is for
+"normal" builds. As there are only three platforms that do something else
+than only defining CLOCK_TICK_RATE (and these are probably easy to fix),
+deprecate mach/timex.h and drop the corresponding files.
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+---
+ arch/arm/Kconfig                              | 15 ++++++++++++
+ arch/arm/include/asm/timex.h                  |  6 ++---
+ arch/arm/mach-clps711x/include/mach/timex.h   |  2 --
+ arch/arm/mach-davinci/include/mach/timex.h    | 22 ------------------
+ arch/arm/mach-dove/include/mach/timex.h       |  9 --------
+ arch/arm/mach-ebsa110/include/mach/timex.h    | 19 ---------------
+ arch/arm/mach-exynos/include/mach/timex.h     | 29 -----------------------
+ arch/arm/mach-footbridge/include/mach/timex.h | 18 ---------------
+ arch/arm/mach-gemini/include/mach/timex.h     | 13 -----------
+ arch/arm/mach-integrator/include/mach/timex.h | 26 ---------------------
+ arch/arm/mach-iop13xx/include/mach/timex.h    |  1 -
+ arch/arm/mach-iop32x/include/mach/timex.h     |  6 -----
+ arch/arm/mach-iop33x/include/mach/timex.h     |  6 -----
+ arch/arm/mach-kirkwood/include/mach/timex.h   | 10 --------
+ arch/arm/mach-lpc32xx/include/mach/timex.h    | 28 -----------------------
+ arch/arm/mach-msm/include/mach/timex.h        | 21 -----------------
+ arch/arm/mach-mv78xx0/include/mach/timex.h    |  9 --------
+ arch/arm/mach-omap1/include/mach/timex.h      |  5 ----
+ arch/arm/mach-omap2/include/mach/timex.h      |  5 ----
+ arch/arm/mach-orion5x/include/mach/timex.h    | 11 ---------
+ arch/arm/mach-realview/include/mach/timex.h   | 23 -------------------
+ arch/arm/mach-s3c24xx/include/mach/timex.h    | 24 -------------------
+ arch/arm/mach-s3c64xx/include/mach/timex.h    | 24 -------------------
+ arch/arm/mach-s5p64x0/include/mach/timex.h    | 27 ----------------------
+ arch/arm/mach-s5pc100/include/mach/timex.h    | 24 -------------------
+ arch/arm/mach-s5pv210/include/mach/timex.h    | 29 -----------------------
+ arch/arm/mach-shark/include/mach/timex.h      |  7 ------
+ arch/arm/mach-shmobile/include/mach/timex.h   |  6 -----
+ arch/arm/mach-spear/include/mach/timex.h      | 19 ---------------
+ arch/arm/mach-versatile/include/mach/timex.h  | 23 -------------------
+ arch/arm/mach-w90x900/include/mach/timex.h    | 25 --------------------
+ arch/arm/plat-omap/include/plat/timex.h       | 33 ---------------------------
+ 32 files changed, 18 insertions(+), 507 deletions(-)
+ delete mode 100644 arch/arm/mach-clps711x/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-davinci/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-dove/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-ebsa110/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-exynos/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-footbridge/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-gemini/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-integrator/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-iop13xx/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-iop32x/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-iop33x/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-kirkwood/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-lpc32xx/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-msm/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-mv78xx0/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-omap1/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-omap2/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-orion5x/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-realview/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-s3c24xx/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-s3c64xx/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-s5p64x0/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-s5pc100/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-s5pv210/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-shark/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-shmobile/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-spear/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-versatile/include/mach/timex.h
+ delete mode 100644 arch/arm/mach-w90x900/include/mach/timex.h
+ delete mode 100644 arch/arm/plat-omap/include/plat/timex.h
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 1ad6fb6..f480753 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -260,6 +260,12 @@ config NEED_MACH_MEMORY_H
+ 	  definitions for this platform.  The need for mach/memory.h should
+ 	  be avoided when possible.
+ 
++config NEED_MACH_TIMEX_H
++	bool
++	help
++	  Select this when mach/timex.h is required to provide special
++	  definitions for this platform. This should be avoided when possible.
++
+ config PHYS_OFFSET
+ 	hex "Physical address of main memory" if MMU
+ 	depends on !ARM_PATCH_PHYS_VIRT && !NEED_MACH_MEMORY_H
+@@ -362,6 +368,7 @@ config ARCH_AT91
+ 	select IRQ_DOMAIN
+ 	select NEED_MACH_GPIO_H
+ 	select NEED_MACH_IO_H if PCCARD
++	select NEED_MACH_TIMEX_H
+ 	select PINCTRL
+ 	select PINCTRL_AT91 if USE_OF
+ 	help
+@@ -416,6 +423,7 @@ config ARCH_EP93XX
+ 	select CLKDEV_LOOKUP
+ 	select CPU_ARM920T
+ 	select NEED_MACH_MEMORY_H
++	select NEED_MACH_TIMEX_H
+ 	help
+ 	  This enables support for the Cirrus EP93xx series of CPUs.
+ 
+@@ -437,6 +445,7 @@ config ARCH_NETX
+ 	select CLKSRC_MMIO
+ 	select CPU_ARM926T
+ 	select GENERIC_CLOCKEVENTS
++	select NEED_MACH_TIMEX_H
+ 	help
+ 	  This enables support for systems based on the Hilscher NetX Soc
+ 
+@@ -488,6 +497,7 @@ config ARCH_IXP4XX
+ 	select GENERIC_CLOCKEVENTS
+ 	select MIGHT_HAVE_PCI
+ 	select NEED_MACH_IO_H
++	select NEED_MACH_TIMEX_H
+ 	select USB_EHCI_BIG_ENDIAN_DESC
+ 	select USB_EHCI_BIG_ENDIAN_MMIO
+ 	help
+@@ -560,6 +570,7 @@ config ARCH_MMP
+ 	select IRQ_DOMAIN
+ 	select MULTI_IRQ_HANDLER
+ 	select NEED_MACH_GPIO_H
++	select NEED_MACH_TIMEX_H
+ 	select PINCTRL
+ 	select PLAT_PXA
+ 	select SPARSE_IRQ
+@@ -573,6 +584,7 @@ config ARCH_KS8695
+ 	select CPU_ARM922T
+ 	select GENERIC_CLOCKEVENTS
+ 	select NEED_MACH_MEMORY_H
++	select NEED_MACH_TIMEX_H
+ 	help
+ 	  Support for Micrel/Kendin KS8695 "Centaur" (ARM922T) based
+ 	  System-on-Chip devices.
+@@ -623,6 +635,7 @@ config ARCH_PXA
+ 	select HAVE_IDE
+ 	select MULTI_IRQ_HANDLER
+ 	select NEED_MACH_GPIO_H
++	select NEED_MACH_TIMEX_H
+ 	select PLAT_PXA
+ 	select SPARSE_IRQ
+ 	help
+@@ -673,6 +686,7 @@ config ARCH_RPC
+ 	select ISA_DMA_API
+ 	select NEED_MACH_IO_H
+ 	select NEED_MACH_MEMORY_H
++	select NEED_MACH_TIMEX_H
+ 	select NO_IOPORT
+ 	select VIRT_TO_BUS
+ 	help
+@@ -694,6 +708,7 @@ config ARCH_SA1100
+ 	select ISA
+ 	select NEED_MACH_GPIO_H
+ 	select NEED_MACH_MEMORY_H
++	select NEED_MACH_TIMEX_H
+ 	select SPARSE_IRQ
+ 	help
+ 	  Support for StrongARM 11x0 based boards.
+diff --git a/arch/arm/include/asm/timex.h b/arch/arm/include/asm/timex.h
+index 83f2aa8..5e65662 100644
+--- a/arch/arm/include/asm/timex.h
++++ b/arch/arm/include/asm/timex.h
+@@ -12,10 +12,10 @@
+ #ifndef _ASMARM_TIMEX_H
+ #define _ASMARM_TIMEX_H
+ 
+-#ifdef CONFIG_ARCH_MULTIPLATFORM
+-#define CLOCK_TICK_RATE 1000000
+-#else
++#ifdef CONFIG_NEED_MACH_TIMEX_H
+ #include <mach/timex.h>
++#else
++#define CLOCK_TICK_RATE 1000000
+ #endif
+ 
+ typedef unsigned long cycles_t;
+diff --git a/arch/arm/mach-clps711x/include/mach/timex.h b/arch/arm/mach-clps711x/include/mach/timex.h
+deleted file mode 100644
+index de6fd19..0000000
+--- a/arch/arm/mach-clps711x/include/mach/timex.h
++++ /dev/null
+@@ -1,2 +0,0 @@
+-/* Bogus value */
+-#define CLOCK_TICK_RATE 512000
+diff --git a/arch/arm/mach-davinci/include/mach/timex.h b/arch/arm/mach-davinci/include/mach/timex.h
+deleted file mode 100644
+index 9b88529..0000000
+--- a/arch/arm/mach-davinci/include/mach/timex.h
++++ /dev/null
+@@ -1,22 +0,0 @@
+-/*
+- * DaVinci timer defines
+- *
+- * Author: Kevin Hilman, MontaVista Software, Inc. <source@mvista.com>
+- *
+- * 2007 (c) MontaVista Software, Inc. This file is licensed under
+- * the terms of the GNU General Public License version 2. This program
+- * is licensed "as is" without any warranty of any kind, whether express
+- * or implied.
+- */
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H
+-
+-/*
+- * Alert: Not all timers of the DaVinci family run at a frequency of 27MHz,
+- * but we should be fine as long as CLOCK_TICK_RATE or LATCH (see include/
+- * linux/jiffies.h) are not used directly in code. Currently none of the
+- * code relevant to DaVinci platform depends on these values directly.
+- */
+-#define CLOCK_TICK_RATE 27000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H__ */
+diff --git a/arch/arm/mach-dove/include/mach/timex.h b/arch/arm/mach-dove/include/mach/timex.h
+deleted file mode 100644
+index 251d538..0000000
+--- a/arch/arm/mach-dove/include/mach/timex.h
++++ /dev/null
+@@ -1,9 +0,0 @@
+-/*
+- * arch/arm/mach-dove/include/mach/timex.h
+- *
+- * This file is licensed under the terms of the GNU General Public
+- * License version 2.  This program is licensed "as is" without any
+- * warranty of any kind, whether express or implied.
+- */
+-
+-#define CLOCK_TICK_RATE		(100 * HZ)
+diff --git a/arch/arm/mach-ebsa110/include/mach/timex.h b/arch/arm/mach-ebsa110/include/mach/timex.h
+deleted file mode 100644
+index 4fb43b2..0000000
+--- a/arch/arm/mach-ebsa110/include/mach/timex.h
++++ /dev/null
+@@ -1,19 +0,0 @@
+-/*
+- *  arch/arm/mach-ebsa110/include/mach/timex.h
+- *
+- *  Copyright (C) 1997, 1998 Russell King
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+- *
+- *  EBSA110 architecture timex specifications
+- */
+-
+-/*
+- * On the EBSA, the clock ticks at weird rates.
+- * This is therefore not used to calculate the
+- * divisor.
+- */
+-#define CLOCK_TICK_RATE		47894000
+-
+diff --git a/arch/arm/mach-exynos/include/mach/timex.h b/arch/arm/mach-exynos/include/mach/timex.h
+deleted file mode 100644
+index 6d13875..0000000
+--- a/arch/arm/mach-exynos/include/mach/timex.h
++++ /dev/null
+@@ -1,29 +0,0 @@
+-/* linux/arch/arm/mach-exynos4/include/mach/timex.h
+- *
+- * Copyright (c) 2010-2011 Samsung Electronics Co., Ltd.
+- *		http://www.samsung.com
+- *
+- * Copyright (c) 2003-2010 Simtec Electronics
+- *	Ben Dooks <ben@simtec.co.uk>
+- *
+- * Based on arch/arm/mach-s5p6442/include/mach/timex.h
+- *
+- * EXYNOS4 - time parameters
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+-*/
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H __FILE__
+-
+-/* CLOCK_TICK_RATE needs to be evaluatable by the cpp, so making it
+- * a variable is useless. It seems as long as we make our timers an
+- * exact multiple of HZ, any value that makes a 1->1 correspondence
+- * for the time conversion functions to/from jiffies is acceptable.
+-*/
+-
+-#define CLOCK_TICK_RATE 12000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H */
+diff --git a/arch/arm/mach-footbridge/include/mach/timex.h b/arch/arm/mach-footbridge/include/mach/timex.h
+deleted file mode 100644
+index d0fea9d..0000000
+--- a/arch/arm/mach-footbridge/include/mach/timex.h
++++ /dev/null
+@@ -1,18 +0,0 @@
+-/*
+- *  arch/arm/mach-footbridge/include/mach/timex.h
+- *
+- *  Copyright (C) 1998 Russell King
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+- *
+- *  EBSA285 architecture timex specifications
+- */
+-
+-/*
+- * We assume a constant here; this satisfies the maths in linux/timex.h
+- * and linux/time.h.  CLOCK_TICK_RATE is actually system dependent, but
+- * this must be a constant.
+- */
+-#define CLOCK_TICK_RATE		(50000000/16)
+diff --git a/arch/arm/mach-gemini/include/mach/timex.h b/arch/arm/mach-gemini/include/mach/timex.h
+deleted file mode 100644
+index dc5690b..0000000
+--- a/arch/arm/mach-gemini/include/mach/timex.h
++++ /dev/null
+@@ -1,13 +0,0 @@
+-/*
+- * Gemini timex specifications
+- *
+- * Copyright (C) 2008-2009 Paulius Zaleckas <paulius.zaleckas@teltonika.lt>
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- */
+-
+-/* When AHB bus frequency is 150MHz */
+-#define CLOCK_TICK_RATE	38000000
+diff --git a/arch/arm/mach-integrator/include/mach/timex.h b/arch/arm/mach-integrator/include/mach/timex.h
+deleted file mode 100644
+index 1dcb420..0000000
+--- a/arch/arm/mach-integrator/include/mach/timex.h
++++ /dev/null
+@@ -1,26 +0,0 @@
+-/*
+- *  arch/arm/mach-integrator/include/mach/timex.h
+- *
+- *  Integrator architecture timex specifications
+- *
+- *  Copyright (C) 1999 ARM Limited
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+- */
+-
+-/*
+- * ??
+- */
+-#define CLOCK_TICK_RATE		(50000000 / 16)
+diff --git a/arch/arm/mach-iop13xx/include/mach/timex.h b/arch/arm/mach-iop13xx/include/mach/timex.h
+deleted file mode 100644
+index 45fb274..0000000
+--- a/arch/arm/mach-iop13xx/include/mach/timex.h
++++ /dev/null
+@@ -1 +0,0 @@
+-#define CLOCK_TICK_RATE (100 * HZ)
+diff --git a/arch/arm/mach-iop32x/include/mach/timex.h b/arch/arm/mach-iop32x/include/mach/timex.h
+deleted file mode 100644
+index 7262ab8..0000000
+--- a/arch/arm/mach-iop32x/include/mach/timex.h
++++ /dev/null
+@@ -1,6 +0,0 @@
+-/*
+- * arch/arm/mach-iop32x/include/mach/timex.h
+- *
+- * IOP32x architecture timex specifications
+- */
+-#define CLOCK_TICK_RATE		(100 * HZ)
+diff --git a/arch/arm/mach-iop33x/include/mach/timex.h b/arch/arm/mach-iop33x/include/mach/timex.h
+deleted file mode 100644
+index 54c5890..0000000
+--- a/arch/arm/mach-iop33x/include/mach/timex.h
++++ /dev/null
+@@ -1,6 +0,0 @@
+-/*
+- * arch/arm/mach-iop33x/include/mach/timex.h
+- *
+- * IOP3xx architecture timex specifications
+- */
+-#define CLOCK_TICK_RATE		(100 * HZ)
+diff --git a/arch/arm/mach-kirkwood/include/mach/timex.h b/arch/arm/mach-kirkwood/include/mach/timex.h
+deleted file mode 100644
+index c923cd1..0000000
+--- a/arch/arm/mach-kirkwood/include/mach/timex.h
++++ /dev/null
+@@ -1,10 +0,0 @@
+-/*
+- * arch/arm/mach-kirkwood/include/mach/timex.h
+- *
+- * This file is licensed under the terms of the GNU General Public
+- * License version 2.  This program is licensed "as is" without any
+- * warranty of any kind, whether express or implied.
+- */
+-
+-#define CLOCK_TICK_RATE		(100 * HZ)
+-
+diff --git a/arch/arm/mach-lpc32xx/include/mach/timex.h b/arch/arm/mach-lpc32xx/include/mach/timex.h
+deleted file mode 100644
+index 8d4066b..0000000
+--- a/arch/arm/mach-lpc32xx/include/mach/timex.h
++++ /dev/null
+@@ -1,28 +0,0 @@
+-/*
+- * arch/arm/mach-lpc32xx/include/mach/timex.h
+- *
+- * Author: Kevin Wells <kevin.wells@nxp.com>
+- *
+- * Copyright (C) 2010 NXP Semiconductors
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- */
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H
+-
+-/*
+- * Rate in Hz of the main system oscillator. This value should match
+- * the value 'MAIN_OSC_FREQ' in platform.h
+- */
+-#define CLOCK_TICK_RATE	13000000
+-
+-#endif
+diff --git a/arch/arm/mach-msm/include/mach/timex.h b/arch/arm/mach-msm/include/mach/timex.h
+deleted file mode 100644
+index a62e6b2..0000000
+--- a/arch/arm/mach-msm/include/mach/timex.h
++++ /dev/null
+@@ -1,21 +0,0 @@
+-/* arch/arm/mach-msm/include/mach/timex.h
+- *
+- * Copyright (C) 2007 Google, Inc.
+- *
+- * This software is licensed under the terms of the GNU General Public
+- * License version 2, as published by the Free Software Foundation, and
+- * may be copied, distributed, and modified under those terms.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- */
+-
+-#ifndef __ASM_ARCH_MSM_TIMEX_H
+-#define __ASM_ARCH_MSM_TIMEX_H
+-
+-#define CLOCK_TICK_RATE		1000000
+-
+-#endif
+diff --git a/arch/arm/mach-mv78xx0/include/mach/timex.h b/arch/arm/mach-mv78xx0/include/mach/timex.h
+deleted file mode 100644
+index 0e8c443..0000000
+--- a/arch/arm/mach-mv78xx0/include/mach/timex.h
++++ /dev/null
+@@ -1,9 +0,0 @@
+-/*
+- * arch/arm/mach-mv78xx0/include/mach/timex.h
+- *
+- * This file is licensed under the terms of the GNU General Public
+- * License version 2.  This program is licensed "as is" without any
+- * warranty of any kind, whether express or implied.
+- */
+-
+-#define CLOCK_TICK_RATE		(100 * HZ)
+diff --git a/arch/arm/mach-omap1/include/mach/timex.h b/arch/arm/mach-omap1/include/mach/timex.h
+deleted file mode 100644
+index 4793790..0000000
+--- a/arch/arm/mach-omap1/include/mach/timex.h
++++ /dev/null
+@@ -1,5 +0,0 @@
+-/*
+- * arch/arm/mach-omap1/include/mach/timex.h
+- */
+-
+-#include <plat/timex.h>
+diff --git a/arch/arm/mach-omap2/include/mach/timex.h b/arch/arm/mach-omap2/include/mach/timex.h
+deleted file mode 100644
+index de9f8fc..0000000
+--- a/arch/arm/mach-omap2/include/mach/timex.h
++++ /dev/null
+@@ -1,5 +0,0 @@
+-/*
+- * arch/arm/mach-omap2/include/mach/timex.h
+- */
+-
+-#include <plat/timex.h>
+diff --git a/arch/arm/mach-orion5x/include/mach/timex.h b/arch/arm/mach-orion5x/include/mach/timex.h
+deleted file mode 100644
+index 4c69820..0000000
+--- a/arch/arm/mach-orion5x/include/mach/timex.h
++++ /dev/null
+@@ -1,11 +0,0 @@
+-/*
+- * arch/arm/mach-orion5x/include/mach/timex.h
+- *
+- * Tzachi Perelstein <tzachi@marvell.com>
+- *
+- * This file is licensed under the terms of the GNU General Public
+- * License version 2.  This program is licensed "as is" without any
+- * warranty of any kind, whether express or implied.
+- */
+-
+-#define CLOCK_TICK_RATE		(100 * HZ)
+diff --git a/arch/arm/mach-realview/include/mach/timex.h b/arch/arm/mach-realview/include/mach/timex.h
+deleted file mode 100644
+index 4eeb069..0000000
+--- a/arch/arm/mach-realview/include/mach/timex.h
++++ /dev/null
+@@ -1,23 +0,0 @@
+-/*
+- *  arch/arm/mach-realview/include/mach/timex.h
+- *
+- *  RealView architecture timex specifications
+- *
+- *  Copyright (C) 2003 ARM Limited
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+- */
+-
+-#define CLOCK_TICK_RATE		(50000000 / 16)
+diff --git a/arch/arm/mach-s3c24xx/include/mach/timex.h b/arch/arm/mach-s3c24xx/include/mach/timex.h
+deleted file mode 100644
+index fe9ca1f..0000000
+--- a/arch/arm/mach-s3c24xx/include/mach/timex.h
++++ /dev/null
+@@ -1,24 +0,0 @@
+-/* arch/arm/mach-s3c2410/include/mach/timex.h
+- *
+- * Copyright (c) 2003-2005 Simtec Electronics
+- *	Ben Dooks <ben@simtec.co.uk>
+- *
+- * S3C2410 - time parameters
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+-*/
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H
+-
+-/* CLOCK_TICK_RATE needs to be evaluatable by the cpp, so making it
+- * a variable is useless. It seems as long as we make our timers an
+- * exact multiple of HZ, any value that makes a 1->1 correspondence
+- * for the time conversion functions to/from jiffies is acceptable.
+-*/
+-
+-#define CLOCK_TICK_RATE 12000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H */
+diff --git a/arch/arm/mach-s3c64xx/include/mach/timex.h b/arch/arm/mach-s3c64xx/include/mach/timex.h
+deleted file mode 100644
+index fb2e8cd..0000000
+--- a/arch/arm/mach-s3c64xx/include/mach/timex.h
++++ /dev/null
+@@ -1,24 +0,0 @@
+-/* arch/arm/mach-s3c64xx/include/mach/timex.h
+- *
+- * Copyright (c) 2003-2005 Simtec Electronics
+- *	Ben Dooks <ben@simtec.co.uk>
+- *
+- * S3C6400 - time parameters
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+-*/
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H
+-
+-/* CLOCK_TICK_RATE needs to be evaluatable by the cpp, so making it
+- * a variable is useless. It seems as long as we make our timers an
+- * exact multiple of HZ, any value that makes a 1->1 correspondence
+- * for the time conversion functions to/from jiffies is acceptable.
+-*/
+-
+-#define CLOCK_TICK_RATE 12000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H */
+diff --git a/arch/arm/mach-s5p64x0/include/mach/timex.h b/arch/arm/mach-s5p64x0/include/mach/timex.h
+deleted file mode 100644
+index 4b91faa..0000000
+--- a/arch/arm/mach-s5p64x0/include/mach/timex.h
++++ /dev/null
+@@ -1,27 +0,0 @@
+-/* linux/arch/arm/mach-s5p64x0/include/mach/timex.h
+- *
+- * Copyright (c) 2010 Samsung Electronics Co., Ltd.
+- *		http://www.samsung.com
+- *
+- * Copyright (c) 2003-2005 Simtec Electronics
+- *	Ben Dooks <ben@simtec.co.uk>
+- *
+- * S5P64X0 - time parameters
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+-*/
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H
+-
+-/* CLOCK_TICK_RATE needs to be evaluatable by the cpp, so making it
+- * a variable is useless. It seems as long as we make our timers an
+- * exact multiple of HZ, any value that makes a 1->1 correspondence
+- * for the time conversion functions to/from jiffies is acceptable.
+-*/
+-
+-#define CLOCK_TICK_RATE 12000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H */
+diff --git a/arch/arm/mach-s5pc100/include/mach/timex.h b/arch/arm/mach-s5pc100/include/mach/timex.h
+deleted file mode 100644
+index 47ffb17..0000000
+--- a/arch/arm/mach-s5pc100/include/mach/timex.h
++++ /dev/null
+@@ -1,24 +0,0 @@
+-/* arch/arm/mach-s5pc100/include/mach/timex.h
+- *
+- * Copyright (c) 2003-2005 Simtec Electronics
+- *	Ben Dooks <ben@simtec.co.uk>
+- *
+- * S3C6400 - time parameters
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+-*/
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H
+-
+-/* CLOCK_TICK_RATE needs to be evaluatable by the cpp, so making it
+- * a variable is useless. It seems as long as we make our timers an
+- * exact multiple of HZ, any value that makes a 1->1 correspondence
+- * for the time conversion functions to/from jiffies is acceptable.
+-*/
+-
+-#define CLOCK_TICK_RATE 12000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H */
+diff --git a/arch/arm/mach-s5pv210/include/mach/timex.h b/arch/arm/mach-s5pv210/include/mach/timex.h
+deleted file mode 100644
+index 73dc854..0000000
+--- a/arch/arm/mach-s5pv210/include/mach/timex.h
++++ /dev/null
+@@ -1,29 +0,0 @@
+-/* linux/arch/arm/mach-s5pv210/include/mach/timex.h
+- *
+- * Copyright (c) 2003-2010 Simtec Electronics
+- *	Ben Dooks <ben@simtec.co.uk>
+- *
+- * Copyright (c) 2010 Samsung Electronics Co., Ltd.
+- *		http://www.samsung.com/
+- *
+- * Based on arch/arm/mach-s5p6442/include/mach/timex.h
+- *
+- * S5PV210 - time parameters
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+-*/
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H __FILE__
+-
+-/* CLOCK_TICK_RATE needs to be evaluatable by the cpp, so making it
+- * a variable is useless. It seems as long as we make our timers an
+- * exact multiple of HZ, any value that makes a 1->1 correspondence
+- * for the time conversion functions to/from jiffies is acceptable.
+-*/
+-
+-#define CLOCK_TICK_RATE 12000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H */
+diff --git a/arch/arm/mach-shark/include/mach/timex.h b/arch/arm/mach-shark/include/mach/timex.h
+deleted file mode 100644
+index bb6eeae..0000000
+--- a/arch/arm/mach-shark/include/mach/timex.h
++++ /dev/null
+@@ -1,7 +0,0 @@
+-/*
+- * arch/arm/mach-shark/include/mach/timex.h
+- *
+- * by Alexander Schulz
+- */
+-
+-#define CLOCK_TICK_RATE 1193180
+diff --git a/arch/arm/mach-shmobile/include/mach/timex.h b/arch/arm/mach-shmobile/include/mach/timex.h
+deleted file mode 100644
+index ae0d8d8..0000000
+--- a/arch/arm/mach-shmobile/include/mach/timex.h
++++ /dev/null
+@@ -1,6 +0,0 @@
+-#ifndef __ASM_MACH_TIMEX_H
+-#define __ASM_MACH_TIMEX_H
+-
+-#define CLOCK_TICK_RATE		1193180 /* unused i8253 PIT value */
+-
+-#endif /* __ASM_MACH_TIMEX_H */
+diff --git a/arch/arm/mach-spear/include/mach/timex.h b/arch/arm/mach-spear/include/mach/timex.h
+deleted file mode 100644
+index ef95e5b..0000000
+--- a/arch/arm/mach-spear/include/mach/timex.h
++++ /dev/null
+@@ -1,19 +0,0 @@
+-/*
+- * arch/arm/plat-spear/include/plat/timex.h
+- *
+- * SPEAr platform specific timex definitions
+- *
+- * Copyright (C) 2009 ST Microelectronics
+- * Viresh Kumar <viresh.linux@gmail.com>
+- *
+- * This file is licensed under the terms of the GNU General Public
+- * License version 2. This program is licensed "as is" without any
+- * warranty of any kind, whether express or implied.
+- */
+-
+-#ifndef __PLAT_TIMEX_H
+-#define __PLAT_TIMEX_H
+-
+-#define CLOCK_TICK_RATE			48000000
+-
+-#endif /* __PLAT_TIMEX_H */
+diff --git a/arch/arm/mach-versatile/include/mach/timex.h b/arch/arm/mach-versatile/include/mach/timex.h
+deleted file mode 100644
+index 426199b..0000000
+--- a/arch/arm/mach-versatile/include/mach/timex.h
++++ /dev/null
+@@ -1,23 +0,0 @@
+-/*
+- *  arch/arm/mach-versatile/include/mach/timex.h
+- *
+- *  Versatile architecture timex specifications
+- *
+- *  Copyright (C) 2003 ARM Limited
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+- */
+-
+-#define CLOCK_TICK_RATE		(50000000 / 16)
+diff --git a/arch/arm/mach-w90x900/include/mach/timex.h b/arch/arm/mach-w90x900/include/mach/timex.h
+deleted file mode 100644
+index 164dce0..0000000
+--- a/arch/arm/mach-w90x900/include/mach/timex.h
++++ /dev/null
+@@ -1,25 +0,0 @@
+-/*
+- * arch/arm/mach-w90x900/include/mach/timex.h
+- *
+- * Copyright (c) 2008 Nuvoton technology corporation
+- * All rights reserved.
+- *
+- * Wan ZongShun <mcuos.com@gmail.com>
+- *
+- * Based on arch/arm/mach-s3c2410/include/mach/timex.h
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- */
+-
+-#ifndef __ASM_ARCH_TIMEX_H
+-#define __ASM_ARCH_TIMEX_H
+-
+-/* CLOCK_TICK_RATE Now, I don't use it. */
+-
+-#define CLOCK_TICK_RATE 15000000
+-
+-#endif /* __ASM_ARCH_TIMEX_H */
+diff --git a/arch/arm/plat-omap/include/plat/timex.h b/arch/arm/plat-omap/include/plat/timex.h
+deleted file mode 100644
+index e27d2da..0000000
+--- a/arch/arm/plat-omap/include/plat/timex.h
++++ /dev/null
+@@ -1,33 +0,0 @@
+-/*
+- * arch/arm/plat-omap/include/mach/timex.h
+- *
+- * Copyright (C) 2000 RidgeRun, Inc.
+- * Author:  Greg Lonnon <glonnon@ridgerun.com>
+- *
+- * This program is free software; you can redistribute it and/or modify it
+- * under the terms of the GNU General Public License as published by the
+- * Free Software Foundation; either version 2 of the License, or (at your
+- * option) any later version.
+- *
+- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
+- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+- * NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+- *
+- * You should have received a copy of the  GNU General Public License along
+- * with this program; if not, write  to the Free Software Foundation, Inc.,
+- * 675 Mass Ave, Cambridge, MA 02139, USA.
+- */
+-
+-#if !defined(__ASM_ARCH_OMAP_TIMEX_H)
+-#define __ASM_ARCH_OMAP_TIMEX_H
+-
+-#define CLOCK_TICK_RATE		(HZ * 100000UL)
+-
+-#endif /* __ASM_ARCH_OMAP_TIMEX_H */
