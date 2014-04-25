@@ -22,18 +22,18 @@ static int __exit driver_cleanup(void);
 static irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs *regs);
 
 /* user program opens the driver */
-static int driver_open (struct inode *inode , struct file *filp );
+static int driver_open(struct inode *inode, struct file *filp);
 
 /* user program closes the driver */
-static int driver_release (struct inode *inode , struct file *filp );
+static int driver_release(struct inode *inode, struct file *filp);
 
 /* user program reads from the driver */
-static ssize_t driver_read (struct file *filp , char __user *buff ,
-        size_t count , loff_t *offp );
+static ssize_t driver_read(struct file *filp, char __user *buff,
+        size_t count, loff_t *offp);
 
 /* user program writes to the driver */
-static ssize_t driver_write (struct file *filp , const char __user *buff ,
-        size_t count , loff_t *offp );
+static ssize_t driver_write(struct file *filp, const char __user *buff,
+        size_t count, loff_t *offp);
 
 module_init(driver_init);
 module_exit(driver_cleanup);
@@ -50,7 +50,7 @@ static struct file_operations driver_fops = {
 };
 
 /*
- * module_init - function to insert this module into kernel space
+ * driver_init - function to insert this module into kernel space
  *
  * This is the first of two exported functions to handle inserting this
  * code into a running kernel
@@ -77,8 +77,8 @@ static int __init driver_init(void)
     iowrite32(0xff, GPIO_IEN);
     iowrite32(0xff, GPIO_IFC);
 
-    request_irq(17, interrupt_handler, 0, DRIVER_NAME, NULL);
-    request_irq(18, interrupt_handler, 0, DRIVER_NAME, NULL);
+    request_irq(17, interrupt_handler, 0, DRIVER_NAME, &driver_cdev);
+    request_irq(18, interrupt_handler, 0, DRIVER_NAME, &driver_cdev);
 
     iowrite32(0xFF, GPIO_EXTIFALL);
     iowrite32(0x00FF, GPIO_IEN);
@@ -111,8 +111,8 @@ static void __exit driver_cleanup(void)
 
     // Disable interrupts
     iowrite32(0x0000, GPIO_IEN);
-    free_irq(17);
-    free_irq(18);
+    free_irq(17, &driver_cdev);
+    free_irq(18, &driver_cdev);
 
     release_mem_region(GPIO_PA_BASE, GPIO_IFC - GPIO_PA_BASE);
 }
