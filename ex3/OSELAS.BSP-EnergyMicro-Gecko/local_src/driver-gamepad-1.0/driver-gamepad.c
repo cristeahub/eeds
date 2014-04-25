@@ -65,6 +65,8 @@ static int __init driver_init(void)
     unsigned long num_ports = GPIO_IFC - GPIO_PA_BASE; //GPIO_IFC is the last used address in GPIO
 
     cdev_init(&driver_cdev, &driver_fops);
+    driver_cdev.owner = THIS_MODULE;
+    cdev_add(&driver_cdev, device_number, 1);
 
     err = request_mem_region(GPIO_PA_BASE, num_ports, DRIVER_NAME);
     if (err) return -1;
