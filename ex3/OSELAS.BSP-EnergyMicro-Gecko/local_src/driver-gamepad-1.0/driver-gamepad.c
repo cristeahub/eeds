@@ -14,6 +14,7 @@
 
 static dev_t device_number;
 struct cdev driver_cdev;
+struct class *cl;
 
 #define DRIVER_NAME "gamepad"
 
@@ -62,11 +63,21 @@ static int __init driver_init(void)
 {
     printk(KERN_INFO "Loading driver module...\n");
 
-    unsigned long num_ports = GPIO_IFC - GPIO_PA_BASE; //GPIO_IFC is the last used address in GPIO
+    /* Dynamically allocate device numbers */
+    int result = alloc_chrdev_region(&device_number, 0, 1, DRIVER_NAME);
+
+    if (result < 0) {
+        printk(KERN_ALERT "Failed to allocate device numbers\n");
+        return -1;
+    }
 
     cdev_init(&driver_cdev, &driver_fops);
     driver_cdev.owner = THIS_MODULE;
     cdev_add(&driver_cdev, device_number, 1);
+    cl = class_create(THIS_MODULE, DRIVER_NAME);
+    device_create(cl, NULL, device_number, NULL, DRIVER_NAME);
+
+    unsigned long num_ports = GPIO_IFC - GPIO_PA_BASE; //GPIO_IFC is the last used address in GPIO
 
     err = request_mem_region(GPIO_PA_BASE, num_ports, DRIVER_NAME);
     if (err) return -1;
@@ -86,13 +97,6 @@ static int __init driver_init(void)
     iowrite32(0x00FF, GPIO_IEN);
     iowrite32(0xFF, GPIO_IFC);
 
-    /* Dynamically allocate device numbers */
-    int result = alloc_chrdev_region(&device_number, 0, 1, DRIVER_NAME);
-
-    if (result < 0) {
-        printk(KERN_ALERT "Failed to allocate device numbers\n");
-        return -1;
-    }
 
     printk(KERN_INFO "Gamepad driver loaded.\n");
     return 0;
