@@ -1,0 +1,88 @@
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+\input{_setup.tex}
+
+%----------------------------------------------------------------------------------------
+%   TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{ 
+\normalfont \normalsize 
+\textsc{Norwegian University of Science and Technology} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge \textbf{Assignment 3} \\ % The assignment title
+TDT4258 \\
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{GROUP 6:\\Stian Jensen\\Asbjørn Ottesen Steinskog\\Christoffer Tønnessen}
+
+\date{\normalsize April 27, 2014}
+
+\begin{document}
+
+\pagenumbering{roman}
+
+\maketitle
+
+\thispagestyle{firststyle}
+
+\newpage
+
+%ABSTRACT
+\input{abstract/abstract.tex}
+
+\newpage
+
+\tableofcontents
+
+\setcounter{secnumdepth}{3}
+
+\newpage
+
+\pagenumbering{arabic}
+
+%INTRODUCTION
+\input{introduction/introduction.tex}
+
+\newpage
+
+%DEV PROCESS
+\input{environment/environment.tex}
+
+\newpage
+
+%DESCRIPTION AND METHODOLOGY
+\input{description/description.tex}
+
+\newpage
+
+%RESULTS AND TEST
+\input{results/results.tex}
+
+\newpage
+
+%EVALUATION OF ASSIGNMENT
+\input{evaluation/evaluation.tex}
+
+\newpage
+
+%CONCLUSION
+\input{conclusion/conclusion.tex}
+
+\newpage
+
+%REFERENCES
+\input{references/references.tex}
+
+\newpage
+
+\begin{alphasection}
+%APPENDIX A
+\input{appendix/a.tex}
+
+\end{alphasection}
+
+
+\end{document}

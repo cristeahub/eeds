@@ -1,0 +1,29 @@
+\section{Conclusion}
+
+In doing this assignment, we learned how to use the ptxdist build system with the \si{\micro}Clinux fork of the linux kernel.
+We got to use the knowledge we obtained from the previous two assignments to make a game and write a driver for the gamepad.
+We chose to make a Tetris based puzzle, as we wanted to keep elements from a classic game, but also make our new twist on it, so that it becomes somewhat original.
+We found this assignment to be really educational, and it was also fun getting to implement our own game on a microcontroller.
+
+\subsection{Further improvements}
+
+Each time a place is either moved, rotated or placed, we redraw the game board.
+To achieve even greater energy efficience than we did, we could make sure to only re-draw the least possible amount of pixels that is changed on the screen.
+This could be done by first drawing the area where the piece was located before the action, and then drawing the area where the piece is located after the action.
+
+It's very hard to get any deeper sleep with an operating system running.
+One solution to this would be to implement the game without the OS.
+Either by making our own screen renderer that printed to the screen, or by using a more lightweight library.
+
+\subsection{High score}
+
+Here follows a high-score list with our scores. Can you beat us?
+
+\begin{table}[ht!]
+        \begin{tabular}{ll}
+                Christoffer & 380 \\
+                Stian       & 378 \\
+                Asbjørn     & 362 \\
+                \end{tabular}
+            \end{table}
+

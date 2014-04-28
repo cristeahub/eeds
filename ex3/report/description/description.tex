@@ -1,0 +1,107 @@
+\section{Development process and implementation}
+\label{chap:development_process}
+
+This part details the steps used for implementing the game in C and writing the driver.
+
+% - setting up interrupts from c
+% - embedding assembly
+
+\subsection{Writing the gamepad driver}
+
+The driver for the gamepad is implemented in the file driver-gamepad-1.0. There are several functions for handling the different tasks of the gamepad driver, which we will detail below.
+We chose to implement the driver using interrupts, and having user-space programs communicating with it through signals, for maximum energy efficiency.
+All parts of the driver are implemented as described in LDD\cite{ldd}, mainly chapters 2, 3, 6, 9 and 10.
+
+\subsubsection{Init}
+
+The gamepad\_init function allocates the device number dynamically, and stores it in its dev\_t structure. It then registers itself as a char device, so applications will be able to access it.
+
+We further request access to the memory region we are going to be reading from. This has no direct practical effect, but is merely a courtesy. If every driver developer requests access to memory regions this way, you will know upfront if anyone else is going to be writing to the same address space as you. Even withouth calling this function first, the driver would still function properly.
+
+\subsubsection{Cleanup}
+
+Everything that's been set up in the init function has to be unregistered here.
+By convention, we unregister things in the opposite order of their registration.
+
+\subsubsection{Interrupts}
+
+Interrupts are used for reading the state of the buttons, as we have done in the two previous exercices.
+The only real difference this time is that in addition to setting up the interrupt handlers and enabling interrupts as before, we have to let the kernel know that we are waiting for interrupts. If we fail to do this, it will simply ignore any interrupts it receives, as it is not aware of any drivers interested in receiving them.
+
+\subsubsection{Signals}
+
+To let software that takes advantage of this driver avoid having to poll the driver constantly for changes, we have added support for signal handlers.
+
+\subsection{Computer game}
+
+The game is a Tetris-inspired puzzle game, in which you are supposed to fill the screen with randomly chosen pieces, so that they take up as much space as possible.
+The game started as a Tetris variation, but quickly pivoted to be a puzzle game with elements of Bejewelled.
+This in turn made the game a lot more energy efficient.
+The game only redraws the screen on input from the user, and sleeps whenever it can.
+
+See figure \ref{fig:gameplay} for a picture of the gameplay, and figure \ref{fig:score} for a finished game showing the score.
+
+\subsubsection{Button controls}
+
+You change the direction of the block by using the four buttons on the right-hand side of the gamepad; by pushing the right button, the blocks default "down" will turn towards the right side of the screen.
+This is in contrast to the original Tetris, where you just rotate the block either to the right or left.
+
+On the left-hand side of the gamepad, the two right and left buttons are used for sliding the block to the right and left.
+The down button the the left-hand side gamepad places the given piece on the current position.
+
+\subsubsection{Goal}
+
+Your goal is to fill up the board with as few gaps between the blocks as possible.
+This is done by placing, or "puzzling" the pieces together, and ensuring that you don't make any gaps.
+When no more blocks fit the space, you complete the game and get a score based on both the amount of screen you have filled up, but also with a combo if you chain together the same color.
+
+In opposition to the original Tetris, rows of blocks aren't removed in this game.
+Once it is placed, it stays there until the game is finished. This minimizes the times we need to re-draw the board, and we only do the score-calculations once you've finished.
+
+\subsubsection{Game development}
+
+The game is written in C using the gamepad driver written as another part of the exercise.
+Logically both the pieces and the board are represented as a large array of numbers representing colors.
+By only having a one-dimensional array some space is saved and the mapping to the frame buffer turned out to be significantly simplified.
+
+The game boots up and firstly initializes its dependencies.
+
+It starts by initializing the framebuffer \cite{internet-linux-fb}.
+The framebuffer is a driver located at /dev/fb0.
+After it has opened the driver it reads the information from the screen's variable information.
+This information is used to memory map the framebuffer to a region in the memory, which significantly eases the handeling of the framebuffer.
+Afterwards a starting screen is drawn and the final call to update the display is made.
+
+Afterwards the program initializes the gamepad driver.
+
+\subsubsection{Energy consumption}
+
+To minimize the energy consumption for our game, the "Full solution" with interrupts was implemented.
+This is mentioned in more detail on page 57 in the compendium.
+
+The focus during the development of the game was to draw as little as possible to the screen and having the game sleep as much as possible.
+Upon boot the screen is drawn once to initialize the game for the user, and the game quickly pauses, waiting for a signal interrupt from the driver.
+
+When a signal is registered, the game quickly executes only the neccessary commands to redraw as little as possible before returning back to sleep.
+This is reflected by the fact that only the game tiles are redrawn while a game is in progress, the background and score are left alone.
+When a new game is stared the score is reset by a drawing a rectangle as litte as possible over the score and writing the score out again.
+
+\subsubsection{Score algorithm}
+
+The score is calculated by giving 1 point for each square that is filled on the board.
+It also gives extra points for each adjacent block that has the same color.
+This is done by doubling the score for each adjacent same-colored block.
+The maximum theoretical score that a player may achieve, is 970 points.
+To achieve this score, the player would need to fill the whole board with only same-colored pieces.
+
+\subsubsection{Score representation}
+The score representation is implemented by emulating a digital clock.
+Each line needed to draw a number is easily chosen by a bit string.
+These lines will load a full number in the memory ready to be written to screen.
+Another function adds multiple numbers besides eachother.
+It is all packed in functions to make sure that there is no unnessesary drawing to screen.
+
+The drawing of numbers happenes two times during a game.
+Upon the start of a new game, the number 0 is written so the player knows there is a score.
+When the game is over, the score is written instead of the zero.
+Even though this operation isn't common, a lot of resources has been put into making these numbers as efficient as possible.
