@@ -1,0 +1,124 @@
+## VIM
+*.sw*
+
+## Archives
+*.zip
+*.tar.gz
+*.gz
+logfile
+
+# NEVER AGAIN
+platform-energymicro-efm32gg-dk3750/
+
+# Other
+game
+*.gdb
+
+## DS STORE PIECE OF SHIT
+.DS_Store
+
+## Produced files
+*.bin
+*.elf
+*.o
+
+## Core latex/pdflatex auxiliary files:
+*.fls
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
+*.pdf
+
+## Intermediate documents:
+*.dvi
+# these rules might exclude image files for figures etc.
+# *.ps
+# *.eps
+# *.pdf
+
+## Bibliography auxiliary files (bibtex/biblatex/biber):
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+## Build tool auxiliary files:
+*.fdb_latexmk
+*.synctex.gz
+*.pdfsync
+
+## Auxiliary and intermediate files from other packages:
+
+# algorithms
+*.alg
+*.loa
+
+# amsthm
+*.thm
+
+# beamer
+*.nav
+*.snm
+*.vrb
+
+# glossaries
+*.acn
+*.acr
+*.glg
+*.glo
+*.gls
+
+# hyperref
+*.brf
+
+# listings
+*.lol
+
+# makeidx
+*.idx
+*.ilg
+*.ind
+*.ist
+
+# minitoc
+*.maf
+*.mtc
+*.mtc0
+
+# minted
+*.pyg
+
+# nomencl
+*.nlo
+
+# todonotes
+*.tdo
+
+# xindy
+*.xdy
+
+*.wav
+
+bin/

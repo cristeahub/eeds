@@ -1,0 +1,36 @@
+\section{Results and Tests}
+
+There was an opening sequence and two versions of the program implemented; one version using polling, where the computer has to check the status of the GPIO repeatedly and the final version using interrputs, where the program may sleep between its tasks. The version running interrupts is expected to produce significantly less power consumptive results. This section addresses the implications of an opening sequence as well as results for both programs.
+
+\subsection{Implications of an opening sequence}
+
+When no opening sequence is present, the power consumption of the device is approximately 370 \si{\micro\ampere} over very few clock cycles, see Figure \ref{fig:no_opening_seq} in appendix B on page \pageref{fig:no_opening_seq}. When there is an opening sequence, the power consumption for the device is approximately 4.3 \si{\milli\ampere} over multiple seconds, see Figure \ref{fig:opening_seq} in appendix B on page \pageref{fig:opening_seq}. Because of this, there is a significant power usage if the opening sequence is present.
+
+The opening sequence is meant for the user. Most of the devices with an architecture like the one we are programming for, are devices that needs to live a long time with mostly no interaction, but when they are told to work, it's crucial that they do. Therefore an opening sequence will be beneficial. If one of the LEDs in this case is faulty, one can see it when booting up the device rather than later. It might be, if the device is designed for an alarm, that the alam will never play and no feedback will be given.
+
+The opening sequence uses a lot of power, but this is mostly due to its long duration. One way to improve it would be to shorten it while still testing all LEDs in a fashion easy understandable by a human being. If the system is supposed to be turned on for a long time, for instance multiple years, then the power consumption of the opening sequence in this case is not so crucial. The longer the device is on, the more negligible the opening sequence becomes.
+
+\subsection{Comparison}
+
+The comparison of the different values are shown in table \ref{tab:energy_usage}.
+One major point one can see from the table is that the biggest difference is between energy mode 1 and energy mode 2. This difference is way lager than energy mode 1 and polling. An interrupt in energy mode 2 is 1617 times less power consuming than polling or interrupts in energy mode 1.
+A more detailed view of each energy level is shown in appendix B on page \pageref{appendix:b}.
+
+\begin{table}[ht!]
+    \begin{center}
+    \begin{tabular}{ | l | l | l | }
+        \hline
+        I/O Mode    & Idling energy usage \\
+        \hline
+        Polling & 3.51 mA \\
+        \hline
+        Interrupts w/Energy mode 1 & 1.19 mA \\
+        \hline
+        Interrupts w/Energy mode 2 & 2.17 \si{\micro\ampere} \\
+        \hline
+    \end{tabular}
+    \caption{Average current while idling for different methods of input reading}
+    \label{tab:energy_usage}
+    \end{center}
+\end{table}
+

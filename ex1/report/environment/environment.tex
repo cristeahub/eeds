@@ -1,0 +1,12 @@
+\section{Development environment}
+All of the development on the EFM32 was done in the computer lab 458 on the fourth floor of the Computer Science building (IT-bygget vest). Git was chosen as the version control system, mainly used together with GitHub. This meant we were not bound to work on the report inside of the lab. \texttt{vim} was used as the text editor of the authors.
+
+The development environment for the EFM32 was already set up on the workstations in the lab and connected via USB to an EFM32GG-DK3750 development kit. There was a framework set up with a vector table and some subroutines, so all our resources was going towards solving the problem.
+
+The assignment was part of a bigger compendium \cite{eeds-compendium} which contained a lot of useful information. This gave us a quick insight to the different tools that were avaibale to us, as well as an explanation of the problem we needed to solve.
+
+\subsection{eAProfiler}
+The development board provided software for us to do measurements. All the photos of graphs are from this program. The development PC was connected to the development board through a USB port. As long as it was connected to the PC there was no need for power.
+
+\subsection{Make}
+GNU Make was used for automation of compiling. This scriptable build tool was used to make sure all variables and dependencies were correct. This made the development process and flashing of the card much easier. Also for the compilation of the report GNU Make was used. Because of this, dependencies were easier to handle. This ensured the correct report was always current.
